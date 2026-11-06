@@ -87,6 +87,13 @@ public class AuthController : ControllerBase
         if (usuario is null || !usuario.Ativo || !BCrypt.Net.BCrypt.Verify(request.Senha, usuario.SenhaHash))
             return Unauthorized(new { erro = "Email ou senha inválidos." });
 
+        if (usuario.LojaId is Guid lojaId)
+        {
+            var loja = await _db.Lojas.FindAsync(lojaId);
+            if (loja is null || !loja.Ativa)
+                return StatusCode(StatusCodes.Status403Forbidden, new { erro = "Loja suspensa. Contate o suporte." });
+        }
+
         return Ok(new
         {
             token = _jwt.GerarToken(usuario),

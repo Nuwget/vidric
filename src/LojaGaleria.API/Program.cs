@@ -105,6 +105,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<LojaGaleria.API.Middleware.LojaAtivaMiddleware>();
+
 app.MapControllers();
 
 app.Run();
