@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
 
     public DbSet<Loja> Lojas => Set<Loja>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<Produto> Produtos => Set<Produto>();
+    public DbSet<MovimentoEstoque> MovimentosEstoque => Set<MovimentoEstoque>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,18 +46,83 @@ public class AppDbContext : DbContext
 
             entity.HasQueryFilter(u => _tenant.EhSuperAdmin || u.LojaId == _tenant.LojaIdAtual);
         });
+
+        modelBuilder.Entity<Produto>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Nome).IsRequired().HasMaxLength(200);
+            entity.Property(p => p.Modelo).HasMaxLength(200);
+            entity.Property(p => p.Cor).HasMaxLength(100);
+            entity.Property(p => p.Categoria).HasMaxLength(100);
+            entity.Property(p => p.CodigoBarras).HasMaxLength(100);
+            entity.Property(p => p.Observacoes).HasMaxLength(1000);
+            entity.Property(p => p.PrecoVenda).HasPrecision(18, 2);
+            entity.Property(p => p.Custo).HasPrecision(18, 2);
+
+            entity.HasOne(p => p.Loja)
+                .WithMany()
+                .HasForeignKey(p => p.LojaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(p => p.LojaId);
+            entity.HasIndex(p => new { p.LojaId, p.Ativo });
+            entity.HasIndex(p => new { p.LojaId, p.CodigoBarras })
+                .IsUnique()
+                .HasFilter("CodigoBarras IS NOT NULL");
+            entity.HasIndex(p => new { p.LojaId, p.QtdEstoque, p.EstoqueMinimo });
+
+            entity.HasQueryFilter(p => _tenant.EhSuperAdmin || p.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<MovimentoEstoque>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Tipo).HasConversion<string>().HasMaxLength(20);
+            entity.Property(m => m.Motivo).HasMaxLength(500);
+
+            entity.HasOne(m => m.Produto)
+                .WithMany()
+                .HasForeignKey(m => m.ProdutoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(m => new { m.LojaId, m.ProdutoId, m.DataHora });
+
+            entity.HasQueryFilter(m => _tenant.EhSuperAdmin || m.LojaId == _tenant.LojaIdAtual);
+        });
     }
 
     public override int SaveChanges()
     {
         ValidarVinculoPapelLoja();
+        ValidarEstoque();
         return base.SaveChanges();
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ValidarVinculoPapelLoja();
+        ValidarEstoque();
         return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ValidarEstoque()
+    {
+        foreach (var entry in ChangeTracker.Entries<Produto>()
+                     .Where(e => e.State is EntityState.Added or EntityState.Modified))
+        {
+            var produto = entry.Entity;
+            if (produto.QtdEstoque < 0)
+                throw new InvalidOperationException($"QtdEstoque não pode ser negativo (produto {produto.Nome}).");
+            if (produto.PrecoVenda < 0 || produto.Custo < 0)
+                throw new InvalidOperationException($"PrecoVenda e Custo não podem ser negativos (produto {produto.Nome}).");
+        }
+
+        foreach (var entry in ChangeTracker.Entries<MovimentoEstoque>()
+                     .Where(e => e.State is EntityState.Added or EntityState.Modified))
+        {
+            if (entry.Entity.Quantidade <= 0)
+                throw new InvalidOperationException("MovimentoEstoque.Quantidade deve ser sempre positiva.");
+        }
     }
 
     private void ValidarVinculoPapelLoja()
