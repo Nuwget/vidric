@@ -6,5 +6,7 @@ public class Loja
     public string Nome { get; set; } = string.Empty;
     public string? Cnpj { get; set; }
     public bool Ativa { get; set; } = true;
+    public string? MotivoSuspensao { get; set; }
+    public DateTime? SuspensaEm { get; set; }
     public DateTime CriadaEm { get; set; } = DateTime.UtcNow;
 }
