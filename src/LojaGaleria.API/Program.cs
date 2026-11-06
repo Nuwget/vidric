@@ -15,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HttpTenantProvider>();
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<LojaGaleria.Infrastructure.Vendas.ServicoVendas>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
