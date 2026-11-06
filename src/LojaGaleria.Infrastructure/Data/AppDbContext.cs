@@ -19,6 +19,9 @@ public class AppDbContext : DbContext
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Produto> Produtos => Set<Produto>();
     public DbSet<MovimentoEstoque> MovimentosEstoque => Set<MovimentoEstoque>();
+    public DbSet<Venda> Vendas => Set<Venda>();
+    public DbSet<ItemVenda> ItemVendas => Set<ItemVenda>();
+    public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +91,57 @@ public class AppDbContext : DbContext
             entity.HasIndex(m => new { m.LojaId, m.ProdutoId, m.DataHora });
 
             entity.HasQueryFilter(m => _tenant.EhSuperAdmin || m.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<Venda>(entity =>
+        {
+            entity.HasKey(v => v.Id);
+            entity.Property(v => v.CpfCliente).HasMaxLength(11);
+            entity.Property(v => v.Total).HasPrecision(18, 2);
+            entity.Property(v => v.Status).HasConversion<string>().HasMaxLength(20);
+            entity.Property(v => v.Observacoes).HasMaxLength(1000);
+
+            entity.HasIndex(v => v.LojaId);
+            entity.HasIndex(v => new { v.LojaId, v.DataHora });
+            entity.HasIndex(v => new { v.LojaId, v.Status });
+            entity.HasIndex(v => new { v.LojaId, v.CpfCliente })
+                .HasFilter("CpfCliente IS NOT NULL");
+
+            entity.HasQueryFilter(v => _tenant.EhSuperAdmin || v.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<ItemVenda>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.Property(i => i.Tipo).HasConversion<string>().HasMaxLength(20);
+            entity.Property(i => i.Descricao).IsRequired().HasMaxLength(300);
+            entity.Property(i => i.PrecoUnitario).HasPrecision(18, 2);
+            entity.Property(i => i.Subtotal).HasPrecision(18, 2);
+
+            entity.HasOne<Venda>()
+                .WithMany(v => v.Itens)
+                .HasForeignKey(i => i.VendaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(i => i.VendaId);
+
+            entity.HasQueryFilter(i => _tenant.EhSuperAdmin || i.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<Pagamento>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Forma).HasConversion<string>().HasMaxLength(20);
+            entity.Property(p => p.Valor).HasPrecision(18, 2);
+
+            entity.HasOne<Venda>()
+                .WithMany(v => v.Pagamentos)
+                .HasForeignKey(p => p.VendaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(p => p.VendaId);
+
+            entity.HasQueryFilter(p => _tenant.EhSuperAdmin || p.LojaId == _tenant.LojaIdAtual);
         });
     }
 
