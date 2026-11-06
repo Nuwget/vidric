@@ -2,7 +2,7 @@
 
 Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories and application services). Each store has isolated users and data; a Super Admin manages which stores exist and can suspend/reactivate them.
 
-**Status:** Phase 2 — Super Admin panel (store management, suspension with request-level blocking, dashboard). Business modules (products, POS, inventory, finance) come later.
+**Status:** Phase 3a — product catalog + stock movements + dead-stock report, on top of the Phase 2 Super Admin panel (store management, suspension with request-level blocking, dashboard). POS/sales (3b) and finance (3c) come later.
 
 ## Stack
 
@@ -18,9 +18,11 @@ Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories
 ```
 LojaGaleria.sln
 └── src/
-    ├── LojaGaleria.Domain/         entities, enums, ITenantProvider
+    ├── LojaGaleria.Domain/         entities, enums, ITenantProvider, stock service
     ├── LojaGaleria.Infrastructure/ AppDbContext, migrations
     └── LojaGaleria.API/            controllers, auth, middleware
+└── tests/
+    └── LojaGaleria.Tests/          xUnit (stock rules + tenant isolation)
 ```
 
 ## Running locally
@@ -63,7 +65,19 @@ The SuperAdmin token has no `loja_id` claim and bypasses tenant filters. Store u
 | POST | `/api/admin/lojas/{id}/usuarios` | SuperAdmin | Add AdminLoja/Funcionario to a store |
 | DELETE | `/api/admin/lojas/{id}/usuarios/{usuarioId}` | SuperAdmin | Soft-deactivate user (guards: self, last active admin) |
 | GET | `/api/admin/dashboard` | SuperAdmin | Global aggregates |
+| POST | `/api/produtos` | AdminLoja/Funcionario | Quick product create; initial stock becomes an `EntradaCompra` movement |
+| GET | `/api/produtos` | AdminLoja/Funcionario | Search/filter/paginate (name, model, color, barcode, category) |
+| GET | `/api/produtos/{id}` | AdminLoja/Funcionario | Product + last 20 stock movements |
+| PUT | `/api/produtos/{id}` | AdminLoja/Funcionario | Update catalog data only (never stock quantity) |
+| POST | `/api/produtos/{id}/movimentos` | AdminLoja/Funcionario | Stock movement; `SaidaVenda` reserved for the POS phase |
+| PATCH | `/api/produtos/{id}/ativo` | AdminLoja/Funcionario | Toggle product active (soft delete) |
+| GET | `/api/produtos/alertas/abaixo-minimo` | AdminLoja/Funcionario | Active products at/below minimum stock |
+| GET | `/api/produtos/relatorios/parados?dias=30` | AdminLoja/Funcionario | Dead-stock report (all stocked items until sales exist; `vendasIndisponiveis: true`) |
+| GET | `/api/produtos/exportar.csv` | AdminLoja/Funcionario | Export stock as CSV |
+| GET | `/api/estoque/dashboard` | AdminLoja/Funcionario | Store stock aggregates + per-category values |
 | GET | `/api/debug/contar-usuarios` | any authenticated | Temporary tenant-filter probe (remove in a later phase) |
+
+**Stock golden rule:** every change to `Produto.QtdEstoque` goes through a `MovimentoEstoque` record (audit trail with user, type, quantity, reason). There is no endpoint that edits stock directly; negative stock is rejected with 400.
 
 Suspension is enforced in two places: login returns 403 for users of inactive stores, and `LojaAtivaMiddleware` rejects **every request** from a suspended store — including tokens issued before the suspension.
 
