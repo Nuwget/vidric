@@ -296,12 +296,10 @@ public class ProdutosController : ControllerBase
         dias = Math.Max(1, dias);
         var corte = DateTime.UtcNow.AddDays(-dias);
 
-        // Fase 3b: quando SaidaVenda existir, filtrar produtos sem vendas recentes:
-        //   .Where(p => !_db.MovimentosEstoque.Any(m => m.ProdutoId == p.Id
-        //       && m.Tipo == TipoMovimentoEstoque.SaidaVenda && m.DataHora >= corte))
-        // e trocar VendasIndisponiveis para false.
         var produtos = await _db.Produtos
             .Where(p => p.Ativo && p.QtdEstoque > 0)
+            .Where(p => !_db.MovimentosEstoque.Any(m => m.ProdutoId == p.Id
+                && m.Tipo == TipoMovimentoEstoque.SaidaVenda && m.DataHora >= corte))
             .ToListAsync();
 
         // SQLite não traduz ORDER BY/SUM de decimal; ordenação e soma no cliente.
@@ -321,7 +319,7 @@ public class ProdutosController : ControllerBase
         return Ok(new
         {
             dias,
-            vendasIndisponiveis = true,
+            vendasIndisponiveis = false,
             valorTotalImobilizado = ordenados.Sum(p => p.QtdEstoque * p.Custo),
             itens
         });

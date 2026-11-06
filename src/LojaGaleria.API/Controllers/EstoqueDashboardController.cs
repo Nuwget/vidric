@@ -1,3 +1,4 @@
+using LojaGaleria.Domain.Enums;
 using LojaGaleria.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,14 @@ public class EstoqueDashboardController : ControllerBase
         // SQLite não traduz SUM/GROUP BY de decimal; agregados calculados no cliente.
         var ativos = await _db.Produtos.Where(p => p.Ativo).ToListAsync();
 
+        var corte = DateTime.UtcNow.AddDays(-30);
+        var idsParados = await _db.Produtos
+            .Where(p => p.Ativo && p.QtdEstoque > 0)
+            .Where(p => !_db.MovimentosEstoque.Any(m => m.ProdutoId == p.Id
+                && m.Tipo == TipoMovimentoEstoque.SaidaVenda && m.DataHora >= corte))
+            .Select(p => p.Id)
+            .ToListAsync();
+
         var categorias = ativos
             .GroupBy(p => p.Categoria ?? "Sem categoria")
             .Select(g => new
@@ -40,9 +49,7 @@ public class EstoqueDashboardController : ControllerBase
             totalSkusZerados = ativos.Count(p => p.QtdEstoque == 0),
             totalSkusAbaixoMinimo = ativos.Count(p => p.QtdEstoque <= p.EstoqueMinimo),
             valorTotalEstoque = ativos.Sum(p => p.Custo * p.QtdEstoque),
-            // Fase 3b: substituir pelo filtro de produtos sem SaidaVenda nos últimos 30 dias
-            // (mesma regra de /api/produtos/relatorios/parados).
-            valorEstoqueParado = ativos.Where(p => p.QtdEstoque > 0).Sum(p => p.Custo * p.QtdEstoque),
+            valorEstoqueParado = ativos.Where(p => idsParados.Contains(p.Id)).Sum(p => p.Custo * p.QtdEstoque),
             categorias
         });
     }
