@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
             entity.HasKey(l => l.Id);
             entity.Property(l => l.Nome).IsRequired().HasMaxLength(200);
             entity.Property(l => l.Cnpj).HasMaxLength(18);
+            entity.Property(l => l.MotivoSuspensao).HasMaxLength(500);
         });
 
         modelBuilder.Entity<Usuario>(entity =>

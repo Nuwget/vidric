@@ -33,9 +33,16 @@ namespace LojaGaleria.Infrastructure.Migrations
                     b.Property<DateTime>("CriadaEm")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MotivoSuspensao")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("SuspensaEm")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
