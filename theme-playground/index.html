@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vidric · Playground de Tema (dev)</title>
+<style>
+  /* Tokens do tema — sobrescritos ao vivo pelo painel (documentElement.style) */
+  :root{
+    --accent:#2E7D32; --accent-brand:#2E7D32; --accent-text:#2E7D32; --accent-strong:#256628; --accent-soft:rgba(46,125,50,.14); --on-accent:#fff;
+    --danger:#D32F2F; --danger-text:#D32F2F; --danger-soft:rgba(211,47,47,.14);
+    --bg:#fff; --surface:#f5f5f7; --fg:#1d1d1f; --muted:#6e6e73;
+    --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(0,0,0,.08); --glass-blur:18px;
+    --radius:16px; --shadow:0 1px 2px rgba(0,0,0,.04);
+    --font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--font); background:var(--bg); color:var(--fg); -webkit-font-smoothing:antialiased; transition:background .35s ease,color .35s ease}
+
+  /* App mock */
+  .app{display:grid; grid-template-columns:230px 1fr; height:100vh; padding:18px; gap:18px}
+  .glass{background:var(--glass-bg); backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
+    border:1px solid var(--glass-border); border-radius:var(--radius); box-shadow:var(--shadow)}
+  .sidebar{padding:18px; display:flex; flex-direction:column}
+  .brand{font-size:26px; font-weight:700; letter-spacing:-.02em;
+    background:linear-gradient(120deg,var(--accent-brand),var(--fg)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .brand-sm{display:none}
+  .nav{margin-top:22px; display:flex; flex-direction:column; gap:6px}
+  .nav a{padding:12px 14px; border-radius:12px; color:var(--muted); text-decoration:none; font-size:15px; cursor:pointer}
+  .nav a.active{background:var(--accent-soft); color:var(--accent-text); font-weight:600}
+  .nav a.soon{opacity:.62}
+  .nav a.soon::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;vertical-align:-2px;opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'%3E%3Crect x='4' y='10' width='16' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat}
+  .nav a .tag{float:right; font-size:11px; color:var(--muted)}
+  .user{margin-top:auto; padding-top:16px; border-top:1px solid var(--glass-border); font-size:13px; color:var(--muted)}
+  .user b{display:block; color:var(--fg)}
+
+  .main{display:flex; flex-direction:column; gap:14px; min-width:0}
+  .header{padding:14px 18px; display:flex; align-items:center; gap:10px}
+  .header .store{font-weight:600}
+  .header .who{color:var(--muted); font-size:14px; margin-left:2px}
+  .hamb{width:40px; height:40px; border-radius:10px; border:1px solid var(--glass-border); background:transparent; color:var(--fg); font-size:20px; cursor:pointer; display:none}
+  .btn-ghost{margin-left:auto; padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border); background:transparent; color:var(--fg); cursor:pointer; font-size:13px}
+
+  .banner{padding:12px 16px; border-radius:12px; font-size:14px; background:var(--accent-soft); color:var(--accent-text); display:flex; gap:8px; align-items:center}
+
+  .grid{display:grid; grid-template-columns:1fr 340px; gap:16px; flex:1; min-height:0}
+  .panel-left,.panel-right{padding:18px; display:flex; flex-direction:column; gap:14px; min-height:0; overflow:auto}
+  .search{padding:14px 16px; border-radius:12px; border:1px solid var(--glass-border); background:var(--surface); color:var(--fg); font-size:15px; width:100%}
+  .pel{align-self:flex-start; padding:12px 16px; border-radius:12px; background:var(--accent); color:var(--on-accent); border:none; font-weight:600; cursor:pointer; box-shadow:var(--shadow); white-space:nowrap}
+  .cards{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+  .card{padding:14px; border-radius:14px; background:var(--surface); border:1px solid var(--glass-border); cursor:pointer; position:relative}
+  .card h4{margin:0 0 4px; font-size:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .card .meta{color:var(--muted); font-size:12px}
+  .card .price{margin-top:8px; font-weight:700; color:var(--accent-text)}
+  .badge{position:absolute; top:10px; right:10px; font-size:10px; padding:2px 7px; border-radius:20px; background:var(--danger-soft); color:var(--danger-text)}
+
+  .cart-title{font-weight:600}
+  .line{display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--glass-border); font-size:14px}
+  .line .nm{flex:1; min-width:0}
+  .line .sub{color:var(--muted); font-size:12px}
+  .qty{display:flex; align-items:center; gap:8px}
+  .qty button{width:30px; height:30px; border-radius:8px; border:1px solid var(--glass-border); background:transparent; color:var(--fg); cursor:pointer; font-size:16px; line-height:1}
+  .total{display:flex; justify-content:space-between; padding:14px 0; font-size:18px; font-weight:700}
+  .finalize{width:100%; padding:16px; border-radius:14px; background:var(--accent); color:var(--on-accent); border:none; font-weight:700; font-size:16px; cursor:pointer; min-height:56px; box-shadow:var(--shadow)}
+  .ok{color:var(--accent-text); font-weight:600; font-size:13px}
+  .bad{color:var(--danger-text); font-weight:600; font-size:13px}
+
+  /* Barra flutuante "Ver carrinho" (só mobile) */
+  .cartbar{display:none; position:fixed; left:14px; right:14px; bottom:14px; z-index:45; align-items:center; gap:10px;
+    padding:14px 18px; border-radius:14px; background:var(--accent); color:var(--on-accent); border:none; font-weight:700; font-size:15px; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,.18); min-height:48px}
+  .cartbar .n{background:rgba(255,255,255,.22); padding:2px 9px; border-radius:20px; font-size:13px}
+  .cartbar .t{margin-left:auto}
+  .scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:55}
+  .scrim.show{display:block}
+
+  /* Painel dev */
+  .dev{position:fixed; top:18px; right:18px; bottom:18px; width:340px; z-index:70; display:flex; flex-direction:column; padding:16px; gap:10px; overflow:auto; transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .dev.closed{transform:translateX(calc(100% + 24px))}
+  .dev h3{margin:0; font-size:15px; display:flex; align-items:center; gap:8px}
+  .dev .sub{margin:-6px 0 6px; font-size:12px; color:var(--muted)}
+  .field{display:flex; align-items:center; gap:10px; font-size:13px}
+  .field label{width:130px; color:var(--muted)}
+  .field input[type=color]{width:34px; height:28px; border:none; background:none; cursor:pointer; padding:0}
+  .field input[type=range]{flex:1; accent-color:var(--accent)}
+  .field .val{width:52px; text-align:right; font-variant-numeric:tabular-nums; color:var(--fg); font-size:12px}
+  .section{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-top:8px}
+  .row{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border); background:var(--surface); color:var(--fg); font-size:12px; cursor:pointer; min-height:36px}
+  .chip.on{border-color:var(--accent); color:var(--accent-text); font-weight:600}
+  .save{font-size:12px; color:var(--accent-text)}
+  .readout{background:var(--surface); border:1px solid var(--glass-border); border-radius:10px; padding:10px; font-family:ui-monospace,Menlo,monospace; font-size:11px; white-space:pre-wrap; color:var(--muted); max-height:150px; overflow:auto}
+  .toggle{position:fixed; top:18px; right:18px; z-index:71; width:52px; height:52px; border-radius:50%; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter:blur(var(--glass-blur)); cursor:pointer; font-size:22px; box-shadow:var(--shadow)}
+  .toggle.hide{display:none}
+  textarea.export{width:100%; height:96px; font-family:ui-monospace,monospace; font-size:11px; border-radius:10px; border:1px solid var(--glass-border); background:var(--surface); color:var(--fg); padding:8px; resize:vertical}
+
+  /* ===== Mobile real (< 768px): 1 coluna + carrinho em bottom-sheet + nav drawer ===== */
+  @media (max-width:767px){
+    .app{grid-template-columns:1fr; padding:12px; height:100dvh}
+    .hamb{display:inline-flex; align-items:center; justify-content:center}
+    .brand-sm{display:block; font-size:18px}
+    .sidebar{position:fixed; top:0; left:0; bottom:0; width:280px; z-index:60; border-radius:0 var(--radius) var(--radius) 0; transform:translateX(-105%); transition:transform .3s cubic-bezier(.2,.8,.2,1); background:var(--surface)}
+    .sidebar.open{transform:translateX(0)}
+    .grid{grid-template-columns:1fr}
+    .panel-right{position:fixed; left:0; right:0; bottom:0; z-index:58; max-height:82dvh; transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.8,.2,1); border-radius:var(--radius) var(--radius) 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.22)}
+    .panel-right.open{transform:translateY(0)}
+    .cartbar{display:flex}
+    .pel{width:100%; text-align:center}
+    .main{padding-bottom:78px}
+  }
+  /* tablet (768–1023): 1 coluna, carrinho empilhado */
+  @media (min-width:768px) and (max-width:1023px){ .grid{grid-template-columns:1fr} .panel-right{max-height:none} }
+</style>
+</head>
+<body>
+  <button id="toggle" class="toggle" title="Abrir painel de tema (Ctrl/Cmd+Shift+K)">🎨</button>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="app">
+    <aside class="sidebar glass" id="sidebar">
+      <div class="brand">Vidric</div>
+      <nav class="nav">
+        <a class="active">PDV</a>
+        <a class="soon">Estoque <span class="tag">em breve</span></a>
+        <a class="soon">Financeiro <span class="tag">em breve</span></a>
+        <a class="soon">Contas <span class="tag">em breve</span></a>
+      </nav>
+      <div class="user"><b>Ana Souza</b>Admin da loja</div>
+    </aside>
+
+    <div class="main">
+      <header class="header glass">
+        <button class="hamb" data-action="menu">☰</button>
+        <span class="brand brand-sm">Vidric</span>
+        <span class="store">Capas & Películas Santos</span>
+        <span class="who">· Ana</span>
+        <button class="btn-ghost" data-action="logout">Sair</button>
+      </header>
+
+      <div class="banner"><span>●</span> Caixa aberto · saldo R$ 120,00</div>
+
+      <div class="grid">
+        <section class="panel-left glass">
+          <button class="pel">+ Película c/ Aplicação</button>
+          <input class="search" placeholder="Buscar produto, modelo, código…" value="capinha" />
+          <div class="cards">
+            <div class="card"><span class="badge">baixo</span><h4>Capinha iPhone 15</h4><div class="meta">Preta · TPU</div><div class="price">R$ 39,90</div></div>
+            <div class="card"><h4>Película privacidade</h4><div class="meta">iPhone 15 · 2.5D</div><div class="price">R$ 25,00</div></div>
+            <div class="card"><h4>Cabo USB-C 1m</h4><div class="meta">Nylon trançado</div><div class="price">R$ 19,90</div></div>
+            <div class="card"><span class="badge">baixo</span><h4>Fone BT Air</h4><div class="meta">TWS · branco</div><div class="price">R$ 89,00</div></div>
+          </div>
+        </section>
+
+        <aside class="panel-right glass" id="cart">
+          <div class="cart-title">Carrinho</div>
+          <div class="line"><div class="nm">Capinha iPhone 15 Preta<div class="sub">R$ 39,90 un</div></div><div class="qty"><button>−</button><span>2</span><button>+</button></div></div>
+          <div class="line"><div class="nm">Aplicação de película (serviço)<div class="sub">R$ 10,00 un</div></div><div class="qty"><button>−</button><span>1</span><button>+</button></div></div>
+          <div class="total"><span>Total</span><span>R$ 89,80</span></div>
+          <button class="finalize">Finalizar venda</button>
+          <div class="ok">✓ Venda registrada (Pix)</div>
+          <div class="bad">✕ Estoque insuficiente</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <button class="cartbar" data-action="cart"><span>🛒 Ver carrinho</span><span class="n">3</span><span class="t">R$ 89,80</span></button>
+
+  <aside id="dev" class="dev glass closed">
+    <h3>🎛️ Tema (devtools) <button class="btn-ghost" style="margin-left:auto" data-action="close">Fechar ✕</button></h3>
+    <div class="sub">Mude qualquer cor/efeito → aplica ao vivo e <span class="save">salva sozinha</span>. Recarregue e continua aqui. <kbd>Ctrl/Cmd+Shift+K</kbd></div>
+    <div class="section">Modo</div>
+    <div class="row"><button class="chip" data-mode="light">Light</button><button class="chip" data-mode="dark">Dark</button></div>
+    <div class="section">Ações rápidas</div>
+    <div class="row"><button class="chip" data-preset="vidric">Vidric</button><button class="chip" data-preset="oceano">Oceano</button><button class="chip" data-preset="pesca">Pôr do sol</button></div>
+    <div class="section">Cores semânticas</div>
+    <div class="field"><label>Destaque (accent)</label><input type="color" id="accent"><span class="val" id="v-accent"></span></div>
+    <div class="field"><label>Erro / alerta</label><input type="color" id="danger"><span class="val" id="v-danger"></span></div>
+    <div class="section">Fundo & texto</div>
+    <div class="field"><label>Light · fundo</label><input type="color" id="bgLight"><span class="val" id="v-bgLight"></span></div>
+    <div class="field"><label>Light · texto</label><input type="color" id="fgLight"><span class="val" id="v-fgLight"></span></div>
+    <div class="field"><label>Dark · fundo</label><input type="color" id="bgDark"><span class="val" id="v-bgDark"></span></div>
+    <div class="field"><label>Dark · texto</label><input type="color" id="fgDark"><span class="val" id="v-fgDark"></span></div>
+    <div class="section">Vidro líquido (liquid glass)</div>
+    <div class="field"><label>Matiz do vidro</label><input type="color" id="glassTint"><span class="val" id="v-glassTint"></span></div>
+    <div class="field"><label>Opacidade</label><input type="range" id="glassOpacity" min="0" max="0.9" step="0.01"><span class="val" id="v-glassOpacity"></span></div>
+    <div class="field"><label>Blur</label><input type="range" id="glassBlur" min="0" max="40" step="1"><span class="val" id="v-glassBlur"></span></div>
+    <div class="field"><label>Borda (alpha)</label><input type="range" id="borderAlpha" min="0" max="0.5" step="0.01"><span class="val" id="v-borderAlpha"></span></div>
+    <div class="field"><label>Raio</label><input type="range" id="radius" min="6" max="28" step="1"><span class="val" id="v-radius"></span></div>
+    <div class="section">Variáveis calculadas (investigação)</div>
+    <pre class="readout" id="readout"></pre>
+    <div class="section">Exportar / limpar</div>
+    <div class="row"><button class="chip" data-action="copy-css">Copiar CSS vars</button><button class="chip" data-action="copy-json">Copiar JSON</button><button class="chip" data-action="reset">Resetar</button></div>
+    <textarea class="export" id="export" placeholder="Use “Copiar” acima ou cole aqui para importar."></textarea>
+  </aside>
+
+<script>
+const hex2rgb=h=>{h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255];};
+const rgba=(h,a)=>{const[r,g,b]=hex2rgb(h);return`rgba(${r},${g},${b},${a})`;};
+const mix=(h1,h2,t)=>{const a=hex2rgb(h1),b=hex2rgb(h2);return'#'+a.map((v,i)=>Math.round(v*(1-t)+b[i]*t).toString(16).padStart(2,'0')).join('');};
+const lighten=(h,t)=>mix(h,'#fff',t), darken=(h,t)=>mix(h,'#000',t);
+const lum=h=>{const[r,g,b]=hex2rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+
+const KEY='vidric-theme-v1';
+const DEFAULTS={mode:'light',accent:'#2E7D32',danger:'#D32F2F',bgLight:'#ffffff',fgLight:'#1d1d1f',bgDark:'#0b0b12',fgDark:'#f5f5f7',glassTint:'#ffffff',glassOpacity:.5,glassBlur:18,borderAlpha:.14,radius:16};
+const PRESETS={vidric:{},oceano:{accent:'#1565C0',danger:'#C62828',bgLight:'#eef4fb',fgLight:'#0e2233',bgDark:'#081420',fgDark:'#e6f0fb',glassTint:'#dbeafe',glassOpacity:.55,borderAlpha:.18},pesca:{accent:'#E65100',danger:'#AD1457',bgLight:'#fff7f0',fgLight:'#2b1600',bgDark:'#160a02',fgDark:'#ffe9d6',glassTint:'#ffe0b2',glassOpacity:.5,borderAlpha:.16}};
+
+let state=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));return s?{...DEFAULTS,...s}:{...DEFAULTS};}catch{return{...DEFAULTS};}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));document.querySelector('.save').textContent='salva sozinha ✓';}
+
+function apply(){
+  const d=document.documentElement.style, dk=state.mode==='dark', set=(k,v)=>d.setProperty(k,v);
+  const brand = dk ? lighten(state.accent,.42) : state.accent;
+  const dtext = dk ? lighten(state.danger,.22) : state.danger;
+  const gAlpha = dk ? Math.min(state.glassOpacity*.22,.14) : state.glassOpacity;
+  set('--accent',state.accent); set('--accent-brand',brand); set('--accent-text',brand);
+  set('--accent-strong',darken(state.accent,.12)); set('--accent-soft',rgba(state.accent,.14));
+  set('--on-accent', lum(state.accent)>.62?'#111417':'#fff');
+  set('--danger',state.danger); set('--danger-text',dtext); set('--danger-soft',rgba(state.danger,.16));
+  set('--bg', dk?state.bgDark:state.bgLight); set('--fg', dk?state.fgDark:state.fgLight);
+  set('--surface', dk?lighten(state.bgDark,.07):darken(state.bgLight,.03));
+  set('--muted', dk?mix(state.fgDark,state.bgDark,.26):mix(state.fgLight,state.bgLight,.42));
+  set('--glass-bg', rgba(state.glassTint,gAlpha));
+  set('--glass-border', dk?rgba('#ffffff',Math.max(state.borderAlpha,.10)):rgba('#000000',state.borderAlpha));
+  set('--glass-blur',state.glassBlur+'px'); set('--radius',state.radius+'px');
+  document.documentElement.dataset.theme=state.mode;
+  syncInputs(); syncReadout(); syncChips();
+}
+function syncInputs(){
+  document.querySelectorAll('input[type=color]').forEach(i=>{i.value=state[i.id];const v=document.getElementById('v-'+i.id);if(v)v.textContent=i.value;});
+  ['glassOpacity','glassBlur','borderAlpha','radius'].forEach(id=>{const i=document.getElementById(id);i.value=state[id];document.getElementById('v-'+id).textContent=state[id]+(id==='glassBlur'||id==='radius'?'px':'');});
+}
+function syncChips(){document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('on',c.dataset.mode===state.mode));}
+function syncReadout(){const cs=getComputedStyle(document.documentElement);
+  document.getElementById('readout').textContent=['--accent-brand','--accent-text','--danger-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');}
+
+document.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{state[inp.id]=inp.type==='range'?parseFloat(inp.value):inp.value;save();apply();}));
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;save();apply();});
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state={...DEFAULTS,...PRESETS[b.dataset.preset]};save();apply();});
+document.querySelector('[data-action=close]').onclick=()=>setPanel(false);
+document.getElementById('toggle').onclick=()=>setPanel(true);
+document.querySelector('[data-action=copy-css]').onclick=()=>{const t=buildCSS();navigator.clipboard?.writeText(t);show(t);};
+document.querySelector('[data-action=copy-json]').onclick=()=>{const t=JSON.stringify(state,null,2);navigator.clipboard?.writeText(t);show(t);};
+document.querySelector('[data-action=reset]').onclick=()=>{state={...DEFAULTS};save();apply();};
+document.getElementById('export').addEventListener('change',e=>{try{state={...DEFAULTS,...JSON.parse(e.target.value)};save();apply();}catch{alert('JSON inválido');}});
+
+/* mobile nav drawer + cart bottom sheet */
+const sidebar=document.getElementById('sidebar'), cart=document.getElementById('cart'), scrim=document.getElementById('scrim');
+function openDrawer(){sidebar.classList.add('open');scrim.classList.add('show');}
+function closeDrawer(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+function toggleCart(){cart.classList.toggle('open');document.querySelector('.cartbar').style.display=cart.classList.contains('open')?'none':'';}
+document.querySelector('[data-action=menu]').onclick=openDrawer;
+document.querySelector('[data-action=cart]').onclick=toggleCart;
+scrim.onclick=closeDrawer;
+
+function buildCSS(){const cs=getComputedStyle(document.documentElement);
+  return':root{\n'+['--accent','--accent-brand','--accent-text','--on-accent','--danger','--danger-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n')+'\n}';}
+function show(t){document.getElementById('export').value=t;}
+function setPanel(open){document.getElementById('dev').classList.toggle('closed',!open);document.getElementById('toggle').classList.toggle('hide',open);}
+window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();setPanel(document.getElementById('dev').classList.contains('closed'));}});
+
+/* estado inicial por URL (?mode=dark&drawer=open&cart=open&panel=open&preset=oceano) */
+apply();
+const q=new URLSearchParams(location.search);
+if(q.get('preset')){state={...DEFAULTS,...PRESETS[q.get('preset')]};apply();}
+if(q.get('mode')){state.mode=q.get('mode');apply();}
+if(q.get('drawer')==='open')openDrawer();
+if(q.get('cart')==='open')toggleCart();
+if(q.get('panel')==='open')setPanel(true); else setPanel(false);
+</script>
+</body>
+</html>

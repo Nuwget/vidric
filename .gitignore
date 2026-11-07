@@ -490,3 +490,6 @@ $RECYCLE.BIN/
 
 # Local dev settings (may contain secrets)
 appsettings.Development.json
+
+# Vidric theme playground — screenshots de validação (não versionar)
+theme-playground/screenshots/
