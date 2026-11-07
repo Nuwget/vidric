@@ -19,13 +19,13 @@ test.beforeEach(async ({ page }) => {
   await abrirPagina(page);
 });
 
-test('D1: título, subtítulo e as 10 seções presentes', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Design System — Vidric' })).toBeVisible();
-  await expect(page.getByText('Ferramenta de dev. Não vai para produção.')).toBeVisible();
+test('D1: título, subtítulo e as 14 seções presentes', async ({ page }) => {
+  await expect(page.getByRole('heading', { name: 'Design System', level: 1 })).toBeVisible();
+  await expect(page.getByText('Vidric · ferramenta de dev')).toBeVisible();
   for (const s of SECOES_INDEX) {
     await expect(page.getByTestId(s.id)).toBeAttached();
   }
-  await expect(page.getByRole('navigation', { name: 'Seções' }).getByRole('link')).toHaveCount(10);
+  await expect(page.getByRole('navigation', { name: 'Seções do design system' }).getByRole('link')).toHaveCount(SECOES_INDEX.length);
 });
 
 test('D2 (checklist 6): slider de opacidade altera o vidro ao vivo', async ({ page }) => {
@@ -138,7 +138,7 @@ test('D11: modais de confirmação, formulário e destrutivo abrem e fecham no X
   await expect(page.locator('.ds-toaster [data-sonner-toast]').first()).toContainText('cadastrado');
 
   await page.getByTestId('abrir-modal-destrutivo').click();
-  await expect(page.getByText('Esta ação não pode ser desfeita.')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Esta ação não pode ser desfeita.')).toBeVisible();
   await page.getByTestId('confirmar-exclusao').click();
   await expect(page.getByRole('heading', { name: 'Excluir produto?' })).toBeHidden();
 });

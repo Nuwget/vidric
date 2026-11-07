@@ -50,3 +50,17 @@ test('M4: toast fica visível e largo (full-width) no mobile', async ({ page }) 
   const caixa = await toast.boundingBox();
   expect(caixa!.width).toBeGreaterThan(300);
 });
+
+test('M5 (checklist 2): navegação vira drawer em 375px — hamburger, 14 links, Esc fecha', async ({ page }) => {
+  await expect(page.getByTestId('sidebar-desktop')).toHaveCount(0);
+  await page.getByTestId('abrir-nav').click();
+  const drawer = page.getByTestId('nav-folha');
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('navigation', { name: 'Seções do design system' }).getByRole('link')).toHaveCount(SECOES_INDEX.length);
+  // Busca dentro do drawer filtra as seções.
+  await drawer.getByTestId('busca-secoes-mobile').fill('motion');
+  await expect(drawer.getByTestId('nav-secao-motion')).toBeVisible();
+  await expect(drawer.getByTestId('nav-secao-cards')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+});

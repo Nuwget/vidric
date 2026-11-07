@@ -1,0 +1,290 @@
+{
+  "geradoEm": "2026-11-07T22:48:48.185Z",
+  "url": "http://localhost:3000/design-system",
+  "totalCriticoSerio": 0,
+  "combos": [
+    {
+      "viewport": 1440,
+      "tema": "light",
+      "criticoSerio": 0,
+      "passes": 54,
+      "incompletos": 2,
+      "violacoes": []
+    },
+    {
+      "viewport": 1440,
+      "tema": "dark",
+      "criticoSerio": 0,
+      "passes": 54,
+      "incompletos": 2,
+      "violacoes": []
+    },
+    {
+      "viewport": 375,
+      "tema": "light",
+      "criticoSerio": 0,
+      "passes": 53,
+      "incompletos": 2,
+      "violacoes": []
+    },
+    {
+      "viewport": 375,
+      "tema": "dark",
+      "criticoSerio": 0,
+      "passes": 53,
+      "incompletos": 2,
+      "violacoes": []
+    }
+  ],
+  "contraste": [
+    {
+      "nome": "ds-skip-link",
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(46, 125, 50)",
+      "ratio": 5.13,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "mt-0.5 text-xs",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 8.28,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "truncate",
+      "fg": "rgb(134, 180, 136)",
+      "bg": "rgb(33, 44, 39)",
+      "ratio": 6.12,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "truncate",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 15.06,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "transition-colors hover:text-foreground text-mut",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(26, 26, 32)",
+      "ratio": 8.75,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "group/button inline-flex shrink-0 items-center j",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(26, 26, 32)",
+      "ratio": 15.91,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "flex items-center gap-2 rounded-full px-3 py-1 t",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(39, 39, 46)",
+      "ratio": 13.62,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "text-[11px] font-semibold uppercase tracking-[0.",
+      "fg": "rgb(134, 180, 136)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 6.95,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "text-2xl font-semibold tracking-tight",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 15.06,
+      "large": true,
+      "passa": true
+    },
+    {
+      "nome": "font-mono text-xs font-semibold",
+      "fg": "rgb(134, 180, 136)",
+      "bg": "rgb(44, 44, 50)",
+      "ratio": 5.88,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "text-[11px] text-muted-foreground",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(44, 44, 50)",
+      "ratio": 7.01,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "money truncate font-mono text-[11px]",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(44, 44, 50)",
+      "ratio": 12.74,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "p",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(44, 44, 50)",
+      "ratio": 12.74,
+      "large": true,
+      "passa": true
+    },
+    {
+      "nome": "ds-motion-alvo grid h-14 w-28 place-items-center",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(56, 67, 61)",
+      "ratio": 9.46,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "text-xs font-semibold",
+      "fg": "rgb(221, 93, 93)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 4.53,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "option",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(28, 28, 35)",
+      "ratio": 15.56,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "self-start rounded-full px-2 py-0.5 text-[10px]",
+      "fg": "rgb(221, 93, 93)",
+      "bg": "rgb(71, 45, 50)",
+      "ratio": 3.43,
+      "large": false,
+      "passa": false
+    },
+    {
+      "nome": "text-xs",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(49, 49, 55)",
+      "ratio": 6.53,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "money text-[32px] font-bold leading-tight tracki",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(49, 49, 55)",
+      "ratio": 11.87,
+      "large": true,
+      "passa": true
+    },
+    {
+      "nome": "flex items-center gap-1 text-xs font-medium",
+      "fg": "rgb(134, 180, 136)",
+      "bg": "rgb(49, 49, 55)",
+      "ratio": 5.48,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "flex items-center gap-1 text-xs font-medium",
+      "fg": "rgb(251, 194, 102)",
+      "bg": "rgb(49, 49, 55)",
+      "ratio": 8.01,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "group/button inline-flex shrink-0 items-center j",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(11, 11, 18)",
+      "ratio": 18.01,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "inline-flex items-center gap-1 self-start rounde",
+      "fg": "rgb(221, 93, 93)",
+      "bg": "rgb(60, 34, 39)",
+      "ratio": 4,
+      "large": false,
+      "passa": false
+    },
+    {
+      "nome": "inline-flex items-center gap-1 self-start rounde",
+      "fg": "rgb(251, 194, 102)",
+      "bg": "rgb(70, 56, 37)",
+      "ratio": 7.02,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "inline-flex items-center gap-1 self-start rounde",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(28, 28, 35)",
+      "ratio": 8.56,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "group/badge inline-flex h-5 w-fit shrink-0 items",
+      "fg": "rgb(211, 47, 47)",
+      "bg": "rgb(31, 31, 37)",
+      "ratio": 3.29,
+      "large": false,
+      "passa": false
+    },
+    {
+      "nome": "h-10 px-2 text-left align-middle font-medium whi",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(62, 62, 67)",
+      "ratio": 9.77,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "font-medium",
+      "fg": "rgb(245, 245, 247)",
+      "bg": "rgb(49, 49, 55)",
+      "ratio": 11.87,
+      "large": false,
+      "passa": true
+    },
+    {
+      "nome": "ml-2 rounded-full px-2 py-0.5 text-[10px] font-s",
+      "fg": "rgb(221, 93, 93)",
+      "bg": "rgb(75, 49, 54)",
+      "ratio": 3.24,
+      "large": false,
+      "passa": false
+    },
+    {
+      "nome": "px-4 pb-8 text-xs md:px-6",
+      "fg": "rgb(184, 184, 187)",
+      "bg": "rgb(11, 11, 18)",
+      "ratio": 9.91,
+      "large": false,
+      "passa": true
+    }
+  ],
+  "contrasteResumo": {
+    "total": 30,
+    "passando": 26
+  },
+  "auditoriaApp": {
+    "passes": 54,
+    "incompletos": 2,
+    "criticoSerio": 0
+  }
+}
