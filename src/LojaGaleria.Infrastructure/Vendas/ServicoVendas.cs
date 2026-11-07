@@ -131,6 +131,10 @@ public class ServicoVendas
 
         venda.Total = total;
 
+        Caixa? caixaAberto = null;
+        if (pagamentos.Any(p => p.Forma == FormaPagamento.Dinheiro))
+            caixaAberto = await ExigirCaixaAbertoAsync(lojaId, "Abra o caixa antes de vender em dinheiro.", ct);
+
         decimal totalPago = 0m;
         foreach (var pagamento in pagamentos)
         {
@@ -150,6 +154,20 @@ public class ServicoVendas
                 UsuarioId = usuarioId
             };
             _db.Pagamentos.Add(registro);
+
+            if (pagamento.Forma == FormaPagamento.Dinheiro)
+            {
+                _db.MovimentosCaixa.Add(new MovimentoCaixa
+                {
+                    LojaId = lojaId,
+                    CaixaId = caixaAberto!.Id,
+                    Tipo = TipoMovimentoCaixa.VendaDinheiro,
+                    Valor = pagamento.Valor,
+                    Descricao = "Venda PDV",
+                    UsuarioId = usuarioId,
+                    VendaId = venda.Id
+                });
+            }
         }
 
         venda.Status = CalcularStatus(venda.Total, totalPago);
@@ -180,6 +198,10 @@ public class ServicoVendas
         if (totalPago + valor > venda.Total)
             throw new RegraVendaException("Pagamento excede o saldo da venda.");
 
+        Caixa? caixaAberto = null;
+        if (forma == FormaPagamento.Dinheiro)
+            caixaAberto = await ExigirCaixaAbertoAsync(venda.LojaId, "Abra o caixa antes de receber em dinheiro.", ct);
+
         var pagamento = new Pagamento
         {
             LojaId = venda.LojaId,
@@ -189,10 +211,34 @@ public class ServicoVendas
             UsuarioId = usuarioId
         };
         _db.Pagamentos.Add(pagamento);
+
+        if (forma == FormaPagamento.Dinheiro)
+        {
+            _db.MovimentosCaixa.Add(new MovimentoCaixa
+            {
+                LojaId = venda.LojaId,
+                CaixaId = caixaAberto!.Id,
+                Tipo = TipoMovimentoCaixa.VendaDinheiro,
+                Valor = valor,
+                Descricao = "Recebimento de venda",
+                UsuarioId = usuarioId,
+                VendaId = venda.Id
+            });
+        }
+
         venda.Status = CalcularStatus(venda.Total, totalPago + valor);
 
         await _db.SaveChangesAsync(ct);
         return (pagamento, venda);
+    }
+
+    private async Task<Caixa> ExigirCaixaAbertoAsync(Guid lojaId, string mensagem, CancellationToken ct)
+    {
+        var caixa = await _db.Caixas
+            .FirstOrDefaultAsync(c => c.LojaId == lojaId && c.Status == StatusCaixa.Aberto, ct);
+        if (caixa is null)
+            throw new RegraVendaException(mensagem);
+        return caixa;
     }
 
     public static StatusVenda CalcularStatus(decimal total, decimal totalPago) =>
