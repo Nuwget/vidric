@@ -11,18 +11,47 @@
     --danger:#D32F2F; --danger-text:#D32F2F; --danger-soft:rgba(211,47,47,.14);
     --warning:#f9a825; --warning-text:#8e6015; --warning-soft:rgba(249,168,37,.18);
     --bg:#fff; --surface:#f5f5f7; --fg:#1d1d1f; --muted:#6e6e73;
-    --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(0,0,0,.08); --glass-blur:18px;
+    --bg-fog-a:rgba(46,125,50,.26); --bg-fog-b:rgba(120,80,180,.18); --bg-fog-c:rgba(230,145,30,.14);
+    --glass-bg:rgba(255,255,255,.42); --glass-bg-deep:rgba(255,255,255,.55); --glass-bg-thin:rgba(255,255,255,.26);
+    --glass-border:rgba(0,0,0,.08); --glass-blur:32px; --glass-sat:180%; --glass-bright:1.05;
+    --edge-top:rgba(255,255,255,.45); --edge-bottom:rgba(255,255,255,.06);
     --radius:16px; --shadow:0 1px 2px rgba(0,0,0,.04);
+    --shadow-glass:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.08), 0 8px 32px rgba(46,125,50,.08);
     --font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{font-family:var(--font); background:var(--bg); color:var(--fg); -webkit-font-smoothing:antialiased; transition:background .35s ease,color .35s ease}
+  /* Névoa estruturada atrás do vidro: blobs de cor com borda definida —
+     é a borda dos blobs que o feDisplacementMap distorce (refração visível) */
+  body{font-family:var(--font); color:var(--fg); -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(520px 420px at 78% 10%, var(--bg-fog-a), transparent 65%),
+      radial-gradient(560px 460px at 6% 82%, var(--bg-fog-b), transparent 65%),
+      radial-gradient(720px 560px at 50% 52%, var(--bg-fog-c), transparent 70%),
+      var(--bg);
+    transition:color .35s ease}
 
   /* App mock */
   .app{display:grid; grid-template-columns:230px 1fr; height:100vh; padding:18px; gap:18px}
-  .glass{background:var(--glass-bg); backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur));
-    border:1px solid var(--glass-border); border-radius:var(--radius); box-shadow:var(--shadow)}
+  .glass{position:relative; background:var(--glass-bg); border:none; border-radius:var(--radius); box-shadow:var(--shadow-glass);
+    backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright))}
+  /* Refração real (feDisplacementMap): apenas Chromium aceita url() em backdrop-filter.
+     Declarada DEPOIS da base — browsers sem suporte descartam só esta declaração e ficam com o frosted. */
+  .glass{backdrop-filter:blur(calc(var(--glass-blur) - 12px)) saturate(var(--glass-sat)) brightness(var(--glass-bright)) url(#liquid-glass)}
+  /* Borda em gradiente (luz no topo) + aberração cromática sutil na aresta */
+  .glass::before,.card::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:linear-gradient(180deg,var(--edge-top),var(--edge-bottom));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude;
+    filter:drop-shadow(1px 0 0 rgba(255,0,0,.05)) drop-shadow(-1px 0 0 rgba(0,255,255,.05));
+    pointer-events:none}
+  /* Noise de vidro: sem textura o vidro parece plástico */
+  .glass::after,.card::after{content:""; position:absolute; inset:0; border-radius:inherit; opacity:.035; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  /* z-depth: sidebar mais densa, header mais leve que os painéis */
+  .sidebar{--glass-blur:40px; background:var(--glass-bg-deep)}
+  .header{--glass-blur:24px; background:var(--glass-bg-thin)}
   .sidebar{padding:18px; display:flex; flex-direction:column}
   .brand{font-size:26px; font-weight:700; letter-spacing:-.02em;
     background:linear-gradient(120deg,var(--accent-brand),var(--fg)); -webkit-background-clip:text; background-clip:text; color:transparent}
@@ -52,7 +81,7 @@
   .search{padding:14px 16px; border-radius:12px; border:1px solid var(--glass-border); background:var(--surface); color:var(--fg); font-size:15px; width:100%}
   .pel{align-self:flex-start; padding:12px 16px; border-radius:12px; background:var(--accent); color:var(--on-accent); border:none; font-weight:600; cursor:pointer; box-shadow:var(--shadow); white-space:nowrap}
   .cards{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
-  .card{padding:14px; border-radius:14px; background:var(--surface); border:1px solid var(--glass-border); cursor:pointer; position:relative}
+  .card{padding:14px; border-radius:14px; background:var(--glass-bg-thin); border:none; cursor:pointer; position:relative; box-shadow:var(--shadow)}
   .card h4{margin:0 0 4px; font-size:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
   .card .meta{color:var(--muted); font-size:12px}
   .card .price{margin-top:8px; font-weight:700; color:var(--accent-text)}
@@ -116,6 +145,14 @@
 </style>
 </head>
 <body>
+  <!-- Pipeline de refração do liquid glass (feTurbulence → feGaussianBlur → feDisplacementMap) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise"/>
+      <feGaussianBlur in="noise" stdDeviation="2" result="smoothed"/>
+      <feDisplacementMap in="SourceGraphic" in2="smoothed" scale="70" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
   <button id="toggle" class="toggle" title="Abrir painel de tema (Ctrl/Cmd+Shift+K)">🎨</button>
   <div class="scrim" id="scrim"></div>
 
@@ -207,7 +244,7 @@ const lighten=(h,t)=>mix(h,'#fff',t), darken=(h,t)=>mix(h,'#000',t);
 const lum=h=>{const[r,g,b]=hex2rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
 
 const KEY='vidric-theme-v1';
-const DEFAULTS={mode:'light',accent:'#2E7D32',danger:'#D32F2F',warning:'#f9a825',bgLight:'#ffffff',fgLight:'#1d1d1f',bgDark:'#0b0b12',fgDark:'#f5f5f7',glassTint:'#ffffff',glassOpacity:.5,glassBlur:18,borderAlpha:.14,radius:16};
+const DEFAULTS={mode:'light',accent:'#2E7D32',danger:'#D32F2F',warning:'#f9a825',bgLight:'#ffffff',fgLight:'#1d1d1f',bgDark:'#0b0b12',fgDark:'#f5f5f7',glassTint:'#ffffff',glassOpacity:.5,glassBlur:32,borderAlpha:.14,radius:16};
 const PRESETS={vidric:{},oceano:{accent:'#1565C0',danger:'#C62828',bgLight:'#eef4fb',fgLight:'#0e2233',bgDark:'#081420',fgDark:'#e6f0fb',glassTint:'#dbeafe',glassOpacity:.55,borderAlpha:.18},pesca:{accent:'#E65100',danger:'#AD1457',bgLight:'#fff7f0',fgLight:'#2b1600',bgDark:'#160a02',fgDark:'#ffe9d6',glassTint:'#ffe0b2',glassOpacity:.5,borderAlpha:.16}};
 
 let state=load();
@@ -220,6 +257,18 @@ function apply(){
   const dtext = dk ? lighten(state.danger,.22) : state.danger;
   const wtext = dk ? lighten(state.warning,.30) : darken(state.warning,.43);
   const gAlpha = dk ? Math.min(state.glassOpacity*.22,.14) : state.glassOpacity;
+  const violet = mix(state.accent,'#7850B4',.5);
+  set('--bg-fog-a', dk?rgba(state.accent,.14):rgba(state.accent,.26));
+  set('--bg-fog-b', dk?rgba(violet,.24):rgba(violet,.18));
+  set('--bg-fog-c', dk?rgba(state.warning,.10):rgba(state.warning,.14));
+  set('--glass-bg', rgba(state.glassTint,gAlpha));
+  set('--glass-bg-deep', rgba(state.glassTint, dk?Math.min(gAlpha+.09,.20):Math.min(gAlpha+.13,.72)));
+  set('--glass-bg-thin', rgba(state.glassTint, gAlpha*.6));
+  set('--edge-top', dk?'rgba(255,255,255,.16)':'rgba(255,255,255,.45)');
+  set('--edge-bottom', dk?'rgba(255,255,255,.04)':'rgba(255,255,255,.06)');
+  set('--shadow-glass', dk
+    ? `inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.4), 0 8px 32px ${rgba(violet,.15)}`
+    : `inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.08), 0 8px 32px ${rgba(state.accent,.08)}`);
   set('--accent',state.accent); set('--accent-brand',brand); set('--accent-text',brand);
   set('--accent-strong',darken(state.accent,.12)); set('--accent-soft',rgba(state.accent,.14));
   set('--on-accent', lum(state.accent)>.62?'#111417':'#fff');
@@ -228,7 +277,6 @@ function apply(){
   set('--bg', dk?state.bgDark:state.bgLight); set('--fg', dk?state.fgDark:state.fgLight);
   set('--surface', dk?lighten(state.bgDark,.07):darken(state.bgLight,.03));
   set('--muted', dk?mix(state.fgDark,state.bgDark,.26):mix(state.fgLight,state.bgLight,.42));
-  set('--glass-bg', rgba(state.glassTint,gAlpha));
   set('--glass-border', dk?rgba('#ffffff',Math.max(state.borderAlpha,.10)):rgba('#000000',state.borderAlpha));
   set('--glass-blur',state.glassBlur+'px'); set('--radius',state.radius+'px');
   document.documentElement.dataset.theme=state.mode;
@@ -240,7 +288,7 @@ function syncInputs(){
 }
 function syncChips(){document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('on',c.dataset.mode===state.mode));}
 function syncReadout(){const cs=getComputedStyle(document.documentElement);
-  document.getElementById('readout').textContent=['--accent-brand','--accent-text','--danger-text','--warning-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');}
+  document.getElementById('readout').textContent=['--accent-brand','--accent-text','--danger-text','--warning-text','--bg','--surface','--fg','--muted','--bg-fog-a','--glass-bg','--glass-bg-deep','--glass-bg-thin','--edge-top','--glass-blur','--shadow-glass','--radius'].map(k=>`${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');}
 
 document.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{state[inp.id]=inp.type==='range'?parseFloat(inp.value):inp.value;save();apply();}));
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;save();apply();});
@@ -262,7 +310,7 @@ document.querySelector('[data-action=cart]').onclick=toggleCart;
 scrim.onclick=closeDrawer;
 
 function buildCSS(){const cs=getComputedStyle(document.documentElement);
-  return':root{\n'+['--accent','--accent-brand','--accent-text','--on-accent','--danger','--danger-text','--warning','--warning-text','--warning-soft','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n')+'\n}';}
+  return':root{\n'+['--accent','--accent-brand','--accent-text','--on-accent','--danger','--danger-text','--warning','--warning-text','--warning-soft','--bg','--bg-fog-a','--bg-fog-b','--bg-fog-c','--surface','--fg','--muted','--glass-bg','--glass-bg-deep','--glass-bg-thin','--glass-border','--glass-blur','--glass-sat','--glass-bright','--edge-top','--edge-bottom','--shadow-glass','--radius'].map(k=>`  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n')+'\n}';}
 function show(t){document.getElementById('export').value=t;}
 function setPanel(open){document.getElementById('dev').classList.toggle('closed',!open);document.getElementById('toggle').classList.toggle('hide',open);}
 window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();setPanel(document.getElementById('dev').classList.contains('closed'));}});
