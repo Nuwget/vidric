@@ -4,6 +4,8 @@ import { DEMO, SUPER, autenticar, entrar, toastVisivel } from './helpers';
 test.describe('Fase 4 — login e guard', () => {
   test('T3 /login renderiza o card com efeito liquid glass', async ({ page }) => {
     await page.goto('/login');
+    // O default do app é dark; este teste cobre a receita light do vidro.
+    await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
 
     const card = page.locator('.glass');
     await expect(card).toBeVisible();

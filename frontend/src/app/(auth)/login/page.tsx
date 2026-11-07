@@ -124,6 +124,8 @@ function LoginForm() {
           {login.isError ? erroLogin : ''}
         </motion.p>
       </form>
+
+      <p className="text-xs text-muted-foreground text-center mt-4">Demo: demo@vidric.app / Demo@123</p>
     </motion.div>
   );
 }

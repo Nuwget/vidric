@@ -89,6 +89,15 @@ npx playwright show-report playwright-report
 
 Screenshots land in `frontend/screenshots/` (gitignored, same policy as `theme-playground/screenshots/`).
 
+### Before each demo
+
+The app defaults to dark mode and the login card shows the demo credentials. The suite and demos sell real stock, so restock the demo store first:
+
+```bash
+cd frontend
+node scripts/reset-demo.mjs   # restocks every product with qtdEstoque < 5 (+20, EntradaCompra "Reset demo")
+```
+
 **Frontend rules that mirror the backend:**
 
 - Session lives in `localStorage` under `vidric.session`; the Axios request interceptor attaches the bearer token, the response interceptor sends an expired session (401) or a suspended store (403) back to `/login` with the reason.

@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="pt-BR" data-theme="dark" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         {/* Pipeline de refração do liquid glass (feTurbulence → feGaussianBlur → feDisplacementMap).
             Consumido por backdrop-filter: url(#liquid-glass) em .glass — ver globals.css. */}
