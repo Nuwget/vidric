@@ -107,7 +107,7 @@ public class VendasTests : IDisposable
 
         using (var db = CriarContexto(lojaId))
         {
-            var (_, venda) = await new ServicoVendas(db).AdicionarPagamentoAsync(vendaId, Guid.NewGuid(), FormaPagamento.Dinheiro, 40m);
+            var (_, venda) = await new ServicoVendas(db).AdicionarPagamentoAsync(vendaId, Guid.NewGuid(), FormaPagamento.Pix, 40m);
             Assert.Equal(StatusVenda.Paga, venda.Status);
             Assert.Equal(0m, venda.Total - venda.Pagamentos.Sum(p => p.Valor));
         }
@@ -201,7 +201,7 @@ public class VendasTests : IDisposable
                 {
                     new(TipoItemVenda.Servico, null, "Aplicação de película", 1, 10m)
                 },
-                new List<PagamentoInput> { new(FormaPagamento.Dinheiro, 10m) });
+                new List<PagamentoInput> { new(FormaPagamento.Pix, 10m) });
             Assert.Equal(StatusVenda.Paga, venda.Status);
         }
 
