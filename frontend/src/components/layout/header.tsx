@@ -23,7 +23,7 @@ export function Header({ nomeLoja, nomeUsuario, onAbrirMenu, onSair }: Props) {
         <Menu className="size-5" />
       </button>
 
-      <span className="font-semibold">{nomeLoja ?? '—'}</span>
+      <span className="text-[17px] font-semibold tracking-[-0.022em]">{nomeLoja ?? '—'}</span>
       <span className="text-sm text-muted-foreground ml-0.5 truncate">{nomeUsuario}</span>
 
       <BotaoSair onClick={onSair} className="ml-auto" />

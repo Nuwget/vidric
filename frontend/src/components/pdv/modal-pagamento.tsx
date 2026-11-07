@@ -76,9 +76,13 @@ export function ModalPagamento({ aberto, total, salvando, onFechar, onConfirmar 
 
   return (
     <Dialog open={aberto} onOpenChange={(novo) => (novo ? undefined : onFechar())}>
-      <DialogContent className="glass rounded-[var(--radius)] sm:max-w-md p-6 ring-0">
+      {/* bg-transparent/ring-0 anula as utilities bg-popover/ring-1 do DialogContent,
+          que venceriam o background do .glass-modal na cascade */}
+      <DialogContent className="glass-modal bg-transparent ring-0 rounded-[var(--modal-radius)] p-6 sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Pagamento</DialogTitle>
+          <DialogTitle className="text-lg font-semibold tracking-[-0.022em]">
+            Pagamento
+          </DialogTitle>
           <DialogDescription className="text-sm" style={{ color: 'var(--muted)' }}>
             Recebimento parcial vira fiado e fica no relatório “a receber”.
           </DialogDescription>
@@ -91,7 +95,7 @@ export function ModalPagamento({ aberto, total, salvando, onFechar, onConfirmar 
           <span className="text-sm" style={{ color: 'var(--muted)' }}>
             Total da venda
           </span>
-          <span data-testid="pagamento-total" className="text-2xl font-bold money">
+          <span data-testid="pagamento-total" className="text-[32px] font-bold money tracking-[-0.03em]">
             {formatBRL(total)}
           </span>
         </div>

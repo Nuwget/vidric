@@ -69,7 +69,7 @@ export function BuscaProduto({ busca, onBusca, onAdicionar }: Props) {
             <span className="text-[11px] text-muted-foreground">
               Estoque: <span className="font-semibold text-foreground">{produto.qtdEstoque}</span>
             </span>
-            <span className="mt-1 font-bold money" style={{ color: 'var(--accent-text)' }}>
+            <span className="mt-1 font-bold money tracking-[-0.02em]" style={{ color: 'var(--accent-text)' }}>
               {formatBRL(produto.precoVenda)}
             </span>
 

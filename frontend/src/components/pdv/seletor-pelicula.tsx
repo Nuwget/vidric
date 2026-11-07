@@ -55,9 +55,11 @@ export function SeletorPelicula({ onEscolher }: Props) {
       </button>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="glass rounded-[var(--radius)] sm:max-w-md p-6 ring-0">
+        <DialogContent className="glass-modal bg-transparent ring-0 rounded-[var(--modal-radius)] p-6 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Película + aplicação</DialogTitle>
+            <DialogTitle className="text-lg font-semibold tracking-[-0.022em]">
+              Película + aplicação
+            </DialogTitle>
             <DialogDescription className="text-sm" style={{ color: 'var(--muted)' }}>
               Escolhe a película. A aplicação ({formatBRL(SERVICO_APLICACAO.precoUnitario)}) entra como
               serviço no mesmo carrinho.

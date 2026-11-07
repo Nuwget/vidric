@@ -123,14 +123,16 @@ export default function PdvPage() {
         type="button"
         data-testid="abrir-carrinho"
         onClick={() => setFolhaAberta(true)}
-        className="md:hidden fixed left-3.5 right-3.5 bottom-3.5 z-40 flex items-center gap-2.5 px-4 font-bold text-[15px]"
+        className="md:hidden fixed left-3.5 right-3.5 bottom-3.5 z-40 flex items-center gap-2.5 px-4 font-semibold text-[15px]"
         style={{
           minHeight: 48,
-          background: 'var(--accent)',
+          background: 'var(--accent-glass)',
           color: 'var(--on-accent)',
           border: 'none',
           borderRadius: 'calc(var(--radius) * 0.75)',
           boxShadow: '0 6px 20px rgba(0,0,0,.18)',
+          backdropFilter: 'blur(32px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
         }}
       >
         Ver carrinho

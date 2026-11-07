@@ -22,8 +22,8 @@ export function Carrinho({ itens, finalizando, onMais, onMenos, onRemover, onFin
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-0">
-      <div className="flex items-center gap-2 font-semibold">
-        <ShoppingCart className="size-4" />
+      <div className="flex items-center gap-2 text-xl font-bold tracking-[-0.022em]">
+        <ShoppingCart className="size-5" />
         Carrinho
         <span className="text-xs font-normal text-muted-foreground ml-auto">
           {itens.reduce((acc, i) => acc + i.quantidade, 0)} itens
@@ -53,7 +53,7 @@ export function Carrinho({ itens, finalizando, onMais, onMenos, onRemover, onFin
         </motion.div>
       )}
 
-      <div className="flex items-center justify-between py-2 text-lg font-bold money">
+      <div className="flex items-center justify-between py-2 text-[22px] font-bold money tracking-[-0.022em]">
         <span>Total</span>
         <span data-testid="total-carrinho" style={{ color: 'var(--accent-text)' }}>
           {formatBRL(valorTotal)}
