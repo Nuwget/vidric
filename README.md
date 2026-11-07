@@ -2,7 +2,7 @@
 
 Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories and application services). Each store has isolated users and data; a Super Admin manages which stores exist and can suspend/reactivate them.
 
-**Status:** Phase 5a — stock frontend (`/estoque` list with KPIs/search/filters/CSV, product create + detail with movement modals and audit history, dead-stock report) on top of Phase 4 (liquid-glass login + PDV), Phase 3c (Finance/accrual + contas a pagar + caixa), Phase 3b (POS API), Phase 3a (catalog + stock API) and the Phase 2 Super Admin panel. Next: 5b Financeiro → 5c Caixa → 5d Contas a Pagar → 5e SuperAdmin → 6 Deploy.
+**Status:** Phase 5a — stock frontend (`/estoque` list with KPIs/search/filters/CSV, product create + detail with movement modals and audit history, dead-stock report) on top of Phase 4 (liquid-glass login + PDV), Phase 3c (Finance/accrual + contas a pagar + caixa), Phase 3b (POS API), Phase 3a (catalog + stock API) and the Phase 2 Super Admin panel. The dev-only `/design-system` page is the component reference for the next phases. Next: 5b Financeiro → 5c Caixa → 5d Contas a Pagar → 5e SuperAdmin → 6 Deploy.
 
 ## Stack
 
@@ -26,10 +26,11 @@ LojaGaleria.sln
 └── tests/
     └── LojaGaleria.Tests/          xUnit (stock rules, sales concurrency/payments, finance accrual/cash, tenant isolation)
 └── frontend/
-    ├── src/app/                    (auth)/login, (app)/pdv, (app)/estoque (list/novo/detalhe/relatórios), (app)/admin, layout + globals.css
+    ├── src/app/                    (auth)/login, (app)/pdv, (app)/estoque (list/novo/detalhe/relatórios), (app)/admin, design-system (dev-only), layout + globals.css
     ├── src/components/             layout (sidebar/header/caixa banner), pdv (busca/carrinho/pagamento), estoque (badges/menu/movimento/editar), ui (shadcn)
     ├── src/lib/                    axios client + interceptors, session/JWT, PDV cart rules, format, motion
-    ├── e2e/                        Playwright checklist (login, layout, PDV, backend rules, viewports)
+    ├── e2e/                        Playwright checklist (login, layout, PDV, backend rules, stock, design system, viewports)
+    ├── scripts/                    reset-demo.mjs, verify-design-system-prod.mjs (isolated prod build → 404 assertion)
     └── theme-playground/ (repo root) design source of truth for the CSS tokens
 ```
 
@@ -83,11 +84,22 @@ Validation suite (needs the API running; it seeds, sells and suspends real data 
 
 ```bash
 cd frontend
-npx playwright test                        # 47 checks: login, layout, PDV, stock screens, dead-stock report, tenant isolation, 1440px + 375px
+npx playwright test                        # 67 checks: login, layout, PDV, stock screens, dead-stock report, tenant isolation, design system, 1440px + 375px
 npx playwright show-report playwright-report
 ```
 
 Screenshots land in `frontend/screenshots/` (gitignored, same policy as `theme-playground/screenshots/`).
+
+### Design system (dev only)
+
+`http://localhost:3000/design-system` is the **component** source of truth (the playground remains the **CSS token** source of truth). Ten showcase sections — buttons, inputs, selects, cards, badges, modals (the payment modal is the real PDV component), toasts, tables, dropdowns, empty/loading states — plus a fixed glass control panel: opacity/blur/saturate/radius/border/shadow/specular sliders applied live to the real CSS vars, light/dark toggle, code blocks, named snapshots, Reset and Exportar CSS vars. Everything persists to localStorage; the page never writes to the playground or `globals.css`. At 375px the panel becomes a bottom-sheet.
+
+**It never ships to production:** `page.tsx` and `layout.tsx` both call `notFound()` under `NODE_ENV=production`, so the route returns 404 in a real build. There is no sidebar entry. Verify the guard without touching the live dev server:
+
+```bash
+cd frontend
+node scripts/verify-design-system-prod.mjs   # isolated temp copy + junctioned node_modules → build → start → asserts 404
+```
 
 ### Before each demo
 
