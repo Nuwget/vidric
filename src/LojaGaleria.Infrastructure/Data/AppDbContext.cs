@@ -22,6 +22,9 @@ public class AppDbContext : DbContext
     public DbSet<Venda> Vendas => Set<Venda>();
     public DbSet<ItemVenda> ItemVendas => Set<ItemVenda>();
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
+    public DbSet<ContaPagar> ContasPagar => Set<ContaPagar>();
+    public DbSet<Caixa> Caixas => Set<Caixa>();
+    public DbSet<MovimentoCaixa> MovimentosCaixa => Set<MovimentoCaixa>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -142,6 +145,53 @@ public class AppDbContext : DbContext
             entity.HasIndex(p => p.VendaId);
 
             entity.HasQueryFilter(p => _tenant.EhSuperAdmin || p.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<ContaPagar>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Descricao).IsRequired().HasMaxLength(300);
+            entity.Property(c => c.Categoria).HasMaxLength(100);
+            entity.Property(c => c.Valor).HasPrecision(18, 2);
+            entity.Property(c => c.Observacoes).HasMaxLength(1000);
+
+            entity.HasIndex(c => c.LojaId);
+            entity.HasIndex(c => new { c.LojaId, c.Pago, c.Vencimento });
+
+            entity.HasQueryFilter(c => _tenant.EhSuperAdmin || c.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<Caixa>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.ValorAbertura).HasPrecision(18, 2);
+            entity.Property(c => c.ValorFechamentoInformado).HasPrecision(18, 2);
+            entity.Property(c => c.ValorFechamentoCalculado).HasPrecision(18, 2);
+            entity.Property(c => c.Diferenca).HasPrecision(18, 2);
+            entity.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+            entity.Property(c => c.Observacoes).HasMaxLength(1000);
+
+            entity.HasIndex(c => new { c.LojaId, c.DataAbertura });
+            entity.HasIndex(c => new { c.LojaId, c.Status });
+
+            entity.HasQueryFilter(c => _tenant.EhSuperAdmin || c.LojaId == _tenant.LojaIdAtual);
+        });
+
+        modelBuilder.Entity<MovimentoCaixa>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Tipo).HasConversion<string>().HasMaxLength(20);
+            entity.Property(m => m.Valor).HasPrecision(18, 2);
+            entity.Property(m => m.Descricao).HasMaxLength(300);
+
+            entity.HasOne(m => m.Caixa)
+                .WithMany(c => c.Movimentos)
+                .HasForeignKey(m => m.CaixaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(m => new { m.CaixaId, m.DataHora });
+
+            entity.HasQueryFilter(m => _tenant.EhSuperAdmin || m.LojaId == _tenant.LojaIdAtual);
         });
     }
 

@@ -17,6 +17,108 @@ namespace LojaGaleria.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.33");
 
+            modelBuilder.Entity("LojaGaleria.Domain.Entities.Caixa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataAbertura")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataFechamento")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Diferenca")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("LojaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UsuarioAberturaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UsuarioFechamentoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ValorAbertura")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("ValorFechamentoCalculado")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("ValorFechamentoInformado")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LojaId", "DataAbertura");
+
+                    b.HasIndex("LojaId", "Status");
+
+                    b.ToTable("Caixas");
+                });
+
+            modelBuilder.Entity("LojaGaleria.Domain.Entities.ContaPagar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Categoria")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataPagamento")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("LojaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Pago")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Vencimento")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LojaId");
+
+                    b.HasIndex("LojaId", "Pago", "Vencimento");
+
+                    b.ToTable("ContasPagar");
+                });
+
             modelBuilder.Entity("LojaGaleria.Domain.Entities.ItemVenda", b =>
                 {
                     b.Property<Guid>("Id")
@@ -91,6 +193,50 @@ namespace LojaGaleria.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Lojas");
+                });
+
+            modelBuilder.Entity("LojaGaleria.Domain.Entities.MovimentoCaixa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CaixaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ContaPagarId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataHora")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("LojaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("VendaId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaixaId", "DataHora");
+
+                    b.ToTable("MovimentosCaixa");
                 });
 
             modelBuilder.Entity("LojaGaleria.Domain.Entities.MovimentoEstoque", b =>
@@ -340,6 +486,17 @@ namespace LojaGaleria.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LojaGaleria.Domain.Entities.MovimentoCaixa", b =>
+                {
+                    b.HasOne("LojaGaleria.Domain.Entities.Caixa", "Caixa")
+                        .WithMany("Movimentos")
+                        .HasForeignKey("CaixaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Caixa");
+                });
+
             modelBuilder.Entity("LojaGaleria.Domain.Entities.MovimentoEstoque", b =>
                 {
                     b.HasOne("LojaGaleria.Domain.Entities.Produto", "Produto")
@@ -379,6 +536,11 @@ namespace LojaGaleria.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Loja");
+                });
+
+            modelBuilder.Entity("LojaGaleria.Domain.Entities.Caixa", b =>
+                {
+                    b.Navigation("Movimentos");
                 });
 
             modelBuilder.Entity("LojaGaleria.Domain.Entities.Venda", b =>
