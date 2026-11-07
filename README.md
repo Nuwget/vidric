@@ -2,7 +2,7 @@
 
 Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories and application services). Each store has isolated users and data; a Super Admin manages which stores exist and can suspend/reactivate them.
 
-**Status:** Phase 4 — Next.js storefront (liquid-glass login, PDV for the counter, Super Admin placeholder), running on top of Phase 3c (Finance/accrual + contas a pagar + caixa), Phase 3b (POS API), Phase 3a (catalog + stock) and the Phase 2 Super Admin panel.
+**Status:** Phase 5a — stock frontend (`/estoque` list with KPIs/search/filters/CSV, product create + detail with movement modals and audit history, dead-stock report) on top of Phase 4 (liquid-glass login + PDV), Phase 3c (Finance/accrual + contas a pagar + caixa), Phase 3b (POS API), Phase 3a (catalog + stock API) and the Phase 2 Super Admin panel. Next: 5b Financeiro → 5c Caixa → 5d Contas a Pagar → 5e SuperAdmin → 6 Deploy.
 
 ## Stack
 
@@ -26,8 +26,8 @@ LojaGaleria.sln
 └── tests/
     └── LojaGaleria.Tests/          xUnit (stock rules, sales concurrency/payments, finance accrual/cash, tenant isolation)
 └── frontend/
-    ├── src/app/                    (auth)/login, (app)/pdv, (app)/admin, layout + globals.css
-    ├── src/components/             layout (sidebar/header/caixa banner), pdv (busca/carrinho/pagamento), ui (shadcn)
+    ├── src/app/                    (auth)/login, (app)/pdv, (app)/estoque (list/novo/detalhe/relatórios), (app)/admin, layout + globals.css
+    ├── src/components/             layout (sidebar/header/caixa banner), pdv (busca/carrinho/pagamento), estoque (badges/menu/movimento/editar), ui (shadcn)
     ├── src/lib/                    axios client + interceptors, session/JWT, PDV cart rules, format, motion
     ├── e2e/                        Playwright checklist (login, layout, PDV, backend rules, viewports)
     └── theme-playground/ (repo root) design source of truth for the CSS tokens
@@ -83,7 +83,7 @@ Validation suite (needs the API running; it seeds, sells and suspends real data 
 
 ```bash
 cd frontend
-npx playwright test                        # 27 checks: login, layout, PDV, backend rules, 1440px + 375px
+npx playwright test                        # 47 checks: login, layout, PDV, stock screens, dead-stock report, tenant isolation, 1440px + 375px
 npx playwright show-report playwright-report
 ```
 
