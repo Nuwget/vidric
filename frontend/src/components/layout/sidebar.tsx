@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calculator, Lock, LogOut, Receipt, Wallet, X } from 'lucide-react';
+import { BarChart3, Calculator, Lock, LogOut, Package, Wallet, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { VidricLogo } from '@/components/vidric-logo';
 import type { Session } from '@/lib/auth';
@@ -16,12 +16,17 @@ interface Props {
 
 const NAV = [
   { href: '/pdv', rotulo: 'PDV', icone: Calculator, emBreve: false },
-  { href: '/estoque', rotulo: 'Estoque', icone: Receipt, emBreve: true },
+  { href: '/estoque', rotulo: 'Estoque', icone: Package, emBreve: false },
+  { href: '/estoque/relatorios/parados', rotulo: 'Relatórios', icone: BarChart3, emBreve: false },
   { href: '/financeiro', rotulo: 'Financeiro', icone: Wallet, emBreve: true },
 ];
 
 export function Sidebar({ session, aberto, onFechar }: Props) {
   const pathname = usePathname();
+  // Só o item de prefixo mais específico acende (Relatórios dentro de /estoque).
+  const hrefAtivo = NAV.filter(
+    (item) => !item.emBreve && (pathname === item.href || pathname.startsWith(`${item.href}/`)),
+  ).sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <motion.aside
@@ -45,7 +50,7 @@ export function Sidebar({ session, aberto, onFechar }: Props) {
 
       <nav className="mt-6 flex flex-col gap-1.5">
         {NAV.map(({ href, rotulo, icone: Icone, emBreve }) => {
-          const ativo = !emBreve && pathname === href;
+          const ativo = !emBreve && href === hrefAtivo;
           if (emBreve) {
             return (
               <span
