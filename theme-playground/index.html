@@ -9,6 +9,7 @@
   :root{
     --accent:#2E7D32; --accent-brand:#2E7D32; --accent-text:#2E7D32; --accent-strong:#256628; --accent-soft:rgba(46,125,50,.14); --on-accent:#fff;
     --danger:#D32F2F; --danger-text:#D32F2F; --danger-soft:rgba(211,47,47,.14);
+    --warning:#f9a825; --warning-text:#8e6015; --warning-soft:rgba(249,168,37,.18);
     --bg:#fff; --surface:#f5f5f7; --fg:#1d1d1f; --muted:#6e6e73;
     --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(0,0,0,.08); --glass-blur:18px;
     --radius:16px; --shadow:0 1px 2px rgba(0,0,0,.04);
@@ -43,6 +44,8 @@
   .btn-ghost{margin-left:auto; padding:8px 12px; border-radius:10px; border:1px solid var(--glass-border); background:transparent; color:var(--fg); cursor:pointer; font-size:13px}
 
   .banner{padding:12px 16px; border-radius:12px; font-size:14px; background:var(--accent-soft); color:var(--accent-text); display:flex; gap:8px; align-items:center}
+  /* Aviso (caixa fechado etc.) — mesma fórmula de caixa-status-banner.tsx */
+  .warnbar{padding:12px 16px; border-radius:calc(var(--radius) * .6); font-size:14px; font-weight:500; background:var(--warning-soft); color:var(--warning-text); border:1px solid var(--warning); box-shadow:var(--shadow); display:flex; gap:8px; align-items:center}
 
   .grid{display:grid; grid-template-columns:1fr 340px; gap:16px; flex:1; min-height:0}
   .panel-left,.panel-right{padding:18px; display:flex; flex-direction:column; gap:14px; min-height:0; overflow:auto}
@@ -138,6 +141,7 @@
       </header>
 
       <div class="banner"><span>●</span> Caixa aberto · saldo R$ 120,00</div>
+      <div class="warnbar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Caixa fechado. Abra o caixa para vender em dinheiro.</div>
 
       <div class="grid">
         <section class="panel-left glass">
@@ -176,6 +180,7 @@
     <div class="section">Cores semânticas</div>
     <div class="field"><label>Destaque (accent)</label><input type="color" id="accent"><span class="val" id="v-accent"></span></div>
     <div class="field"><label>Erro / alerta</label><input type="color" id="danger"><span class="val" id="v-danger"></span></div>
+    <div class="field"><label>Aviso / warning</label><input type="color" id="warning"><span class="val" id="v-warning"></span></div>
     <div class="section">Fundo & texto</div>
     <div class="field"><label>Light · fundo</label><input type="color" id="bgLight"><span class="val" id="v-bgLight"></span></div>
     <div class="field"><label>Light · texto</label><input type="color" id="fgLight"><span class="val" id="v-fgLight"></span></div>
@@ -202,7 +207,7 @@ const lighten=(h,t)=>mix(h,'#fff',t), darken=(h,t)=>mix(h,'#000',t);
 const lum=h=>{const[r,g,b]=hex2rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
 
 const KEY='vidric-theme-v1';
-const DEFAULTS={mode:'light',accent:'#2E7D32',danger:'#D32F2F',bgLight:'#ffffff',fgLight:'#1d1d1f',bgDark:'#0b0b12',fgDark:'#f5f5f7',glassTint:'#ffffff',glassOpacity:.5,glassBlur:18,borderAlpha:.14,radius:16};
+const DEFAULTS={mode:'light',accent:'#2E7D32',danger:'#D32F2F',warning:'#f9a825',bgLight:'#ffffff',fgLight:'#1d1d1f',bgDark:'#0b0b12',fgDark:'#f5f5f7',glassTint:'#ffffff',glassOpacity:.5,glassBlur:18,borderAlpha:.14,radius:16};
 const PRESETS={vidric:{},oceano:{accent:'#1565C0',danger:'#C62828',bgLight:'#eef4fb',fgLight:'#0e2233',bgDark:'#081420',fgDark:'#e6f0fb',glassTint:'#dbeafe',glassOpacity:.55,borderAlpha:.18},pesca:{accent:'#E65100',danger:'#AD1457',bgLight:'#fff7f0',fgLight:'#2b1600',bgDark:'#160a02',fgDark:'#ffe9d6',glassTint:'#ffe0b2',glassOpacity:.5,borderAlpha:.16}};
 
 let state=load();
@@ -213,11 +218,13 @@ function apply(){
   const d=document.documentElement.style, dk=state.mode==='dark', set=(k,v)=>d.setProperty(k,v);
   const brand = dk ? lighten(state.accent,.42) : state.accent;
   const dtext = dk ? lighten(state.danger,.22) : state.danger;
+  const wtext = dk ? lighten(state.warning,.30) : darken(state.warning,.43);
   const gAlpha = dk ? Math.min(state.glassOpacity*.22,.14) : state.glassOpacity;
   set('--accent',state.accent); set('--accent-brand',brand); set('--accent-text',brand);
   set('--accent-strong',darken(state.accent,.12)); set('--accent-soft',rgba(state.accent,.14));
   set('--on-accent', lum(state.accent)>.62?'#111417':'#fff');
   set('--danger',state.danger); set('--danger-text',dtext); set('--danger-soft',rgba(state.danger,.16));
+  set('--warning',state.warning); set('--warning-text',wtext); set('--warning-soft',rgba(state.warning,.18));
   set('--bg', dk?state.bgDark:state.bgLight); set('--fg', dk?state.fgDark:state.fgLight);
   set('--surface', dk?lighten(state.bgDark,.07):darken(state.bgLight,.03));
   set('--muted', dk?mix(state.fgDark,state.bgDark,.26):mix(state.fgLight,state.bgLight,.42));
@@ -233,7 +240,7 @@ function syncInputs(){
 }
 function syncChips(){document.querySelectorAll('[data-mode]').forEach(c=>c.classList.toggle('on',c.dataset.mode===state.mode));}
 function syncReadout(){const cs=getComputedStyle(document.documentElement);
-  document.getElementById('readout').textContent=['--accent-brand','--accent-text','--danger-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');}
+  document.getElementById('readout').textContent=['--accent-brand','--accent-text','--danger-text','--warning-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');}
 
 document.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{state[inp.id]=inp.type==='range'?parseFloat(inp.value):inp.value;save();apply();}));
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;save();apply();});
@@ -255,7 +262,7 @@ document.querySelector('[data-action=cart]').onclick=toggleCart;
 scrim.onclick=closeDrawer;
 
 function buildCSS(){const cs=getComputedStyle(document.documentElement);
-  return':root{\n'+['--accent','--accent-brand','--accent-text','--on-accent','--danger','--danger-text','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n')+'\n}';}
+  return':root{\n'+['--accent','--accent-brand','--accent-text','--on-accent','--danger','--danger-text','--warning','--warning-text','--warning-soft','--bg','--surface','--fg','--muted','--glass-bg','--glass-border','--glass-blur','--radius'].map(k=>`  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n')+'\n}';}
 function show(t){document.getElementById('export').value=t;}
 function setPanel(open){document.getElementById('dev').classList.toggle('closed',!open);document.getElementById('toggle').classList.toggle('hide',open);}
 window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();setPanel(document.getElementById('dev').classList.contains('closed'));}});

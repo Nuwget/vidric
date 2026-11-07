@@ -16,6 +16,7 @@ Seletor interativo de tokens de tema (estética "liquid glass") para **investiga
 
 - **Destaque (accent)** — padrão verde Vidric `#2E7D32` (a identidade; é o que vai para a Fase 4).
 - **Erro / alerta** — padrão `#D32F2F`.
+- **Aviso (warning)** — padrão `#f9a825`; usado no banner "caixa fechado". O texto é derivado (`darken(.43)` no light, `lighten(.30)` no dark) para manter contraste sobre o fundo claro.
 - **Fundo & texto** — light (branco/cinza-claro) e dark (preto/cinza-escuro com toque de roxo).
 - **Vidro líquido** — matiz, opacidade, blur, alpha da borda e raio.
 
