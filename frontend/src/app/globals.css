@@ -62,7 +62,7 @@
   --danger-soft: rgba(211, 47, 47, 0.16);
 
   --warning: #f9a825;
-  --warning-text: #8d6708;
+  --warning-text: #8e6015; /* playground: darken(--warning, .43) */
   --warning-soft: rgba(249, 168, 37, 0.18);
 
   --bg: #ffffff;
@@ -93,7 +93,7 @@
   --danger-soft: rgba(211, 47, 47, 0.16);
 
   --warning: #f9a825;
-  --warning-text: #fbc266;
+  --warning-text: #fbc266; /* playground: lighten(--warning, .30) */
   --warning-soft: rgba(249, 168, 37, 0.18);
 
   --bg: #0b0b12;
