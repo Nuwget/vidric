@@ -16,6 +16,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HttpTenantProvider>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<LojaGaleria.Infrastructure.Vendas.ServicoVendas>();
+builder.Services.AddScoped<LojaGaleria.Infrastructure.Financeiro.ServicoCaixa>();
+builder.Services.AddScoped<LojaGaleria.Infrastructure.Financeiro.ServicoContasPagar>();
+builder.Services.AddScoped<LojaGaleria.Infrastructure.Financeiro.ServicoFinanceiro>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
