@@ -2,7 +2,7 @@
 
 Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories and application services). Each store has isolated users and data; a Super Admin manages which stores exist and can suspend/reactivate them.
 
-**Status:** Phase 3b — POS (PDV) with sales, sale items and partial payments, on top of Phase 3a (product catalog + stock + dead-stock report) and the Phase 2 Super Admin panel. Finance (3c) comes later.
+**Status:** Phase 3c — Finance (accrual dashboard), contas a pagar and cash register (caixa), on top of Phase 3b (POS/PDV), Phase 3a (catalog + stock + dead-stock) and the Phase 2 Super Admin panel.
 
 ## Stack
 
@@ -18,11 +18,11 @@ Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories
 ```
 LojaGaleria.sln
 └── src/
-    ├── LojaGaleria.Domain/         entities, enums, ITenantProvider, stock service
-    ├── LojaGaleria.Infrastructure/ AppDbContext, migrations, sale service
+    ├── LojaGaleria.Domain/         entities, enums, ITenantProvider, stock + cash rules
+    ├── LojaGaleria.Infrastructure/ AppDbContext, migrations, sale + caixa + contas + financeiro services
     └── LojaGaleria.API/            controllers, auth, middleware
 └── tests/
-    └── LojaGaleria.Tests/          xUnit (stock rules, sales concurrency/payments, tenant isolation)
+    └── LojaGaleria.Tests/          xUnit (stock rules, sales concurrency/payments, finance accrual/cash, tenant isolation)
 ```
 
 ## Running locally
@@ -79,7 +79,22 @@ The SuperAdmin token has no `loja_id` claim and bypasses tenant filters. Store u
 | GET | `/api/vendas` | AdminLoja/Funcionario | List sales (status, CPF, date filters, paginated); `saldo` calculated |
 | GET | `/api/vendas/a-receber` | AdminLoja/Funcionario | Receivables: `Parcial`/`Pendente` sales, oldest first (replaces the fiado notebook) |
 | GET | `/api/vendas/{id}` | AdminLoja/Funcionario | Sale detail: items + payments + saldo |
-| POST | `/api/vendas/{id}/pagamentos` | AdminLoja/Funcionario | Receive a payment on an existing sale (pay off fiado); rejects overpayment |
+| POST | `/api/vendas/{id}/pagamentos` | AdminLoja/Funcionario | Receive a payment on an existing sale (pay off fiado); rejects overpayment; cash payment needs an open caixa (400) |
+| GET | `/api/financeiro/dashboard?dataInicio&dataFim` | AdminLoja/Funcionario | Accrual vs cash: `vendido`, `recebido`, accumulated `emAberto`, breakdown by payment form, `ticketMedio`, contas-a-pagar summary. Defaults to the current month |
+| GET | `/api/financeiro/vendas-por-dia` | AdminLoja/Funcionario | Per-day `vendido`/`recebido`/`qtdVendas` series for the period |
+| GET | `/api/financeiro/fluxo-caixa` | AdminLoja/Funcionario | Signed cash movements in the period (inflows `+`, outflows `−`) |
+| POST | `/api/contas-pagar` | AdminLoja/Funcionario | Create a payable (description + amount + due date) |
+| GET | `/api/contas-pagar?pago&vencidas&categoria` | AdminLoja/Funcionario | List payables (unpaid + overdue first, paginated) |
+| PUT | `/api/contas-pagar/{id}` | AdminLoja/Funcionario | Edit a payable (never flips it to paid) |
+| POST | `/api/contas-pagar/{id}/pagar` | AdminLoja/Funcionario | Settle a payable; `Dinheiro` routes through the open caixa as a `PagamentoConta` outflow, other forms leave caixa untouched |
+| DELETE | `/api/contas-pagar/{id}` | AdminLoja/Funcionario | Delete a payable (409 if already paid) |
+| POST | `/api/caixa/abrir` | AdminLoja/Funcionario | Open the store's cash register (409 if one is already open) |
+| GET | `/api/caixa/atual` | AdminLoja/Funcionario | Current open caixa with computed entries/exits/balance (404 if none) |
+| GET | `/api/caixa` | AdminLoja/Funcionario | Caixa history (paginated) |
+| GET | `/api/caixa/{id}` | AdminLoja/Funcionario | Caixa detail + movements |
+| POST | `/api/caixa/{id}/sangria` | AdminLoja/Funcionario | Cash withdrawal (outflow); 409 if the caixa is closed |
+| POST | `/api/caixa/{id}/suprimento` | AdminLoja/Funcionario | Cash top-up (inflow); 409 if the caixa is closed |
+| POST | `/api/caixa/{id}/fechar` | AdminLoja/Funcionario | Close the caixa; `calculado = Σentradas − Σsaídas`, `diferenca = informado − calculado` |
 | GET | `/api/debug/contar-usuarios` | any authenticated | Temporary tenant-filter probe (remove in a later phase) |
 
 **Stock golden rule:** every change to `Produto.QtdEstoque` goes through a `MovimentoEstoque` record (audit trail with user, type, quantity, reason). There is no endpoint that edits stock directly; negative stock is rejected with 400.
@@ -87,6 +102,8 @@ The SuperAdmin token has no `loja_id` claim and bypasses tenant filters. Store u
 **Sales model:** a sale's `Total` is what was sold; each `Pagamento.Valor` is what was actually received. `Saldo = Total − Σ Pagamentos` is **calculated, never stored**, and `Status` (`Paga`/`Parcial`/`Pendente`) is derived on every payment. Paying off fiado inserts a new `Pagamento` on the existing sale; overpayment is rejected (400). `Servico` items (e.g. screen-protector application) do not touch stock.
 
 **Concurrency:** selling a product runs an atomic conditional `UPDATE Produtos SET QtdEstoque = QtdEstoque - @qtd WHERE Id = @id AND LojaId = @lojaId AND QtdEstoque >= @qtd`. If two operators race for the last unit, exactly one succeeds and the other gets 409 — stock never goes negative. The whole sale is one transaction; any failure rolls back everything.
+
+**Finance golden rule — "vendido ≠ recebido":** `vendido` is accrual (Σ sale totals dated inside the period) while `recebido` is cash (Σ payments received inside the period). A credit sale sold last month but paid today counts in *today's* `recebido` only; `emAberto` is `Σ(Total − ΣPagamentos)` accumulated across **all** sales and is deliberately **not** period-filtered, so it stays the same no matter which window you query. The cash register (`Caixa`) tracks physical drawer money: one open caixa per store (409 to open a second), and cash sales/payments require one (400). Movement sign is fixed by type — `Abertura`/`VendaDinheiro`/`Suprimento` are inflows, `Sangria`/`PagamentoConta`/`Estorno` are outflows. On `fechar`, `valorFechamentoCalculado = Σentradas − Σsaídas` and `diferenca = informado − calculado`. Card/PIX sales never hit the drawer; only `Dinheiro` does.
 
 **SQLite note:** EF Core cannot translate `Sum`/`OrderBy` on `decimal` to SQLite, so reports materialize rows and aggregate on the client (fine for a gallery store's catalog). On PostgreSQL (migration backlog) these run server-side again.
 
