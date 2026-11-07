@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookmarkPlus, Copy, RotateCcw, X } from 'lucide-react';
+import { BookmarkPlus, Copy, RotateCcw, X, ShieldCheck, Loader2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { DsConfig, Snapshots, Sombra } from './defaults';
+import type { ResultadoAxe } from './lib/a11y';
 
 interface Props {
   config: DsConfig;
@@ -25,6 +26,11 @@ interface Props {
   onSalvarSnapshot: (nome: string) => void;
   onAplicarSnapshot: (nome: string) => void;
   onExcluirSnapshot: (nome: string) => void;
+  onRodarAxe: () => void;
+  axeRodando: boolean;
+  axeResultado: ResultadoAxe | null;
+  onExportarRelatorio: () => void;
+  onFocarViolacao: (target: string[]) => void;
 }
 
 function LinhaSlider({
@@ -49,7 +55,7 @@ function LinhaSlider({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between text-xs">
-        <span className="font-medium">{rotulo}</span>
+        <Label className="font-medium">{rotulo}</Label>
         <span className="money" style={{ color: 'var(--muted)' }}>
           {formato(valor)}
         </span>
@@ -76,6 +82,11 @@ export function ControlPanel({
   onSalvarSnapshot,
   onAplicarSnapshot,
   onExcluirSnapshot,
+  onRodarAxe,
+  axeRodando,
+  axeResultado,
+  onExportarRelatorio,
+  onFocarViolacao,
 }: Props) {
   const [nomeSnapshot, setNomeSnapshot] = useState('');
   const nomes = Object.keys(snapshots);
@@ -196,11 +207,118 @@ export function ControlPanel({
         </div>
       </div>
 
+      {/* Painel de acessibilidade (PARTE 4.6 / PARTE 7) */}
+      <div
+        className="flex flex-col gap-3 border-t pt-4"
+        style={{ borderColor: 'var(--glass-border)' }}
+      >
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'var(--muted)' }}>
+          <ShieldCheck className="size-3.5" aria-hidden /> Acessibilidade
+        </p>
+        <LinhaSlider
+          testid="slider-font-scale"
+          rotulo="Escala de fonte"
+          valor={config.fontScale}
+          min={100}
+          max={150}
+          step={25}
+          formato={(v) => `${v}%`}
+          onChange={(v) => onChange({ fontScale: v })}
+        />
+        <div className="flex items-center justify-between">
+          <Label htmlFor="switch-reduced-motion" className="text-xs font-medium">
+            Simular prefers-reduced-motion
+          </Label>
+          <Switch
+            id="switch-reduced-motion"
+            data-testid="switch-reduced-motion"
+            checked={config.reducedMotion}
+            onCheckedChange={(v) => onChange({ reducedMotion: v })}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="switch-contrast" className="text-xs font-medium">
+            Simular prefers-contrast: more
+          </Label>
+          <Switch
+            id="switch-contrast"
+            data-testid="switch-contrast"
+            checked={config.highContrast}
+            onCheckedChange={(v) => onChange({ highContrast: v })}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full bg-transparent"
+          data-testid="botao-auditar-axe"
+          onClick={onRodarAxe}
+          disabled={axeRodando}
+        >
+          {axeRodando ? <Loader2 className="animate-spin" data-icon="inline-start" /> : <ShieldCheck data-icon="inline-start" />}
+          {axeRodando ? 'Auditando…' : 'Rodar auditoria axe'}
+        </Button>
+
+        {axeResultado && (
+          <div
+            data-testid="resultado-axe"
+            className="flex flex-col gap-2 rounded-lg p-2.5 text-xs"
+            style={{ background: 'var(--glass-bg-thin)' }}
+            aria-live="polite"
+          >
+            <p className="font-semibold">
+              {axeResultado.criticoSerio === 0 ? (
+                <span style={{ color: 'var(--accent-text)' }}>0 violações critical/serious ✓</span>
+              ) : (
+                <span style={{ color: 'var(--danger-text)' }}>{axeResultado.criticoSerio} violações critical/serious</span>
+              )}
+            </p>
+            <p style={{ color: 'var(--muted)' }}>
+              {axeResultado.passes} passes · {axeResultado.avisos.length} avisos · {axeResultado.incompletos} incompletos
+            </p>
+            {axeResultado.violacoes.length > 0 && (
+              <ul className="flex flex-col gap-1.5">
+                {axeResultado.violacoes.map((v) => (
+                  <li key={v.id} className="flex flex-col gap-0.5">
+                    <span
+                      className="font-medium"
+                      style={{ color: v.impact === 'critical' || v.impact === 'serious' ? 'var(--danger-text)' : 'var(--warning-text)' }}
+                    >
+                      [{v.impact}] {v.help}
+                    </span>
+                    {v.nodes[0] && (
+                      <button
+                        type="button"
+                        onClick={() => onFocarViolacao(v.nodes[0].target)}
+                        className="self-start rounded text-[11px] underline outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                        style={{ color: 'var(--accent-text)' }}
+                      >
+                        ver elemento ({v.nodes.length})
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-1 w-full bg-transparent"
+              data-testid="botao-exportar-relatorio"
+              onClick={onExportarRelatorio}
+            >
+              <Download data-icon="inline-start" /> Exportar relatório JSON
+            </Button>
+          </div>
+        )}
+      </div>
+
       <div className="flex gap-2">
         <Button
           type="button"
           variant="outline"
-          className="flex-1"
+          className="flex-1 bg-transparent"
           data-testid="botao-reset-painel"
           onClick={onReset}
         >

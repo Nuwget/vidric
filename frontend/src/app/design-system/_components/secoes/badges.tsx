@@ -29,7 +29,7 @@ export function SecaoBadges() {
   return (
     <ShowcaseSection
       id="secao-badges"
-      numero="05"
+      numero="09 · Componente"
       titulo="Badges"
       descricao="Tokens semânticos do playground (accent/danger/warning). Info e neutro usam superfície — não há token --info."
     >
@@ -45,11 +45,11 @@ export function SecaoBadges() {
 
       <Grupo rotulo="Com ícone">
         <div className="flex flex-wrap items-center gap-2">
-          <Semantico bg="var(--accent-soft)" cor="var(--accent-text)"><CircleCheck className="size-3" /> Pago</Semantico>
-          <Semantico bg="var(--danger-soft)" cor="var(--danger-text)"><CircleX className="size-3" /> Esgotado</Semantico>
-          <Semantico bg="var(--warning-soft)" cor="var(--warning-text)"><AlertTriangle className="size-3" /> Abaixo do mínimo</Semantico>
-          <Semantico bg="var(--surface)" cor="var(--fg)"><Info className="size-3" /> Parcial</Semantico>
-          <Semantico bg="var(--surface)" cor="var(--muted)"><Minus className="size-3" /> Inativo</Semantico>
+          <Semantico bg="var(--accent-soft)" cor="var(--accent-text)"><CircleCheck className="size-3" aria-hidden /> Pago</Semantico>
+          <Semantico bg="var(--danger-soft)" cor="var(--danger-text)"><CircleX className="size-3" aria-hidden /> Esgotado</Semantico>
+          <Semantico bg="var(--warning-soft)" cor="var(--warning-text)"><AlertTriangle className="size-3" aria-hidden /> Abaixo do mínimo</Semantico>
+          <Semantico bg="var(--surface)" cor="var(--fg)"><Info className="size-3" aria-hidden /> Parcial</Semantico>
+          <Semantico bg="var(--surface)" cor="var(--muted)"><Minus className="size-3" aria-hidden /> Inativo</Semantico>
         </div>
       </Grupo>
 

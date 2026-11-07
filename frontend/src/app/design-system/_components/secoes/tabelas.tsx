@@ -28,24 +28,24 @@ export function SecaoTabelas() {
   return (
     <ShowcaseSection
       id="secao-tabelas"
-      numero="08"
+      numero="12 · Componente"
       titulo="Tabelas"
-      descricao="Table do shadcn dentro de camada .glass: header translúcido, zebra sutil e ações à direita."
+      descricao="Table do shadcn dentro de camada .glass: header translúcido, zebra sutil, ações com aria-label e semântica completa (scope=col, aria-rowindex)."
     >
       <Grupo rotulo="Com dados">
         <div className="glass overflow-hidden">
-          <Table>
+          <Table aria-label="Produtos em estoque">
             <TableHeader>
-              <TableRow className="bg-[var(--glass-bg-thin)] hover:bg-transparent">
-                <TableHead>Produto</TableHead>
-                <TableHead className="w-20 text-right">Estoque</TableHead>
-                <TableHead className="w-28 text-right">Preço</TableHead>
-                <TableHead className="w-24 text-right">Ações</TableHead>
+              <TableRow className="bg-[var(--glass-bg-thin)] hover:bg-transparent" aria-rowindex={1}>
+                <TableHead scope="col">Produto</TableHead>
+                <TableHead scope="col" className="w-20 text-right">Estoque</TableHead>
+                <TableHead scope="col" className="w-28 text-right">Preço</TableHead>
+                <TableHead scope="col" className="w-24 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {LINHAS.map((l) => (
-                <TableRow key={l.nome} className={ZEBRA}>
+              {LINHAS.map((l, i) => (
+                <TableRow key={l.nome} className={ZEBRA} aria-rowindex={i + 2}>
                   <TableCell>
                     <span className="font-medium">{l.nome}</span>
                     {l.alerta && (
@@ -68,7 +68,7 @@ export function SecaoTabelas() {
                         aria-label={`Editar ${l.nome}`}
                         onClick={() => toast.info(`Editando ${l.nome} (demo).`)}
                       >
-                        <Pencil />
+                        <Pencil aria-hidden />
                       </Button>
                       <Button
                         type="button"
@@ -77,7 +77,7 @@ export function SecaoTabelas() {
                         aria-label={`Excluir ${l.nome}`}
                         onClick={() => toast.success(`${l.nome} excluído (demo).`)}
                       >
-                        <Trash2 />
+                        <Trash2 aria-hidden />
                       </Button>
                     </div>
                   </TableCell>
@@ -90,8 +90,8 @@ export function SecaoTabelas() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Grupo rotulo="Empty state">
-          <div className="glass flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
-            <PackageSearch className="size-8" style={{ color: 'var(--muted)' }} />
+          <div role="status" aria-live="polite" className="glass flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
+            <PackageSearch className="size-8" aria-hidden style={{ color: 'var(--muted)' }} />
             <p className="font-semibold">Nenhum produto encontrado</p>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
               Ajuste a busca ou cadastre um novo produto.
@@ -102,25 +102,25 @@ export function SecaoTabelas() {
               className="mt-2"
               onClick={() => toast.info('Cadastro abre em /estoque/novo (fora desta página).')}
             >
-              <Plus data-icon="inline-start" />
+              <Plus data-icon="inline-start" aria-hidden />
               Novo produto
             </Button>
           </div>
         </Grupo>
 
         <Grupo rotulo="Loading (skeleton)">
-          <div className="glass overflow-hidden">
+          <div className="glass overflow-hidden" aria-busy="true" aria-live="polite" aria-label="Carregando produtos">
             <Table>
               <TableHeader>
-                <TableRow className="bg-[var(--glass-bg-thin)] hover:bg-transparent">
-                  <TableHead>Produto</TableHead>
-                  <TableHead className="w-20 text-right">Estoque</TableHead>
-                  <TableHead className="w-28 text-right">Preço</TableHead>
+                <TableRow className="bg-[var(--glass-bg-thin)] hover:bg-transparent" aria-rowindex={1}>
+                  <TableHead scope="col">Produto</TableHead>
+                  <TableHead scope="col" className="w-20 text-right">Estoque</TableHead>
+                  <TableHead scope="col" className="w-28 text-right">Preço</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {[0, 1, 2, 3].map((i) => (
-                  <TableRow key={i} className={ZEBRA}>
+                  <TableRow key={i} className={ZEBRA} aria-rowindex={i + 2}>
                     <TableCell><Skeleton className="h-4 w-3/4" /></TableCell>
                     <TableCell><Skeleton className="ml-auto h-4 w-8" /></TableCell>
                     <TableCell><Skeleton className="ml-auto h-4 w-16" /></TableCell>
@@ -134,16 +134,20 @@ export function SecaoTabelas() {
 
       <CodeBlock
         codigo={`<div className="glass overflow-hidden">
-  <Table>
+  <Table aria-label="Produtos em estoque">
     <TableHeader>
-      <TableRow className="bg-[var(--glass-bg-thin)]">…</TableRow>
+      <TableRow aria-rowindex={1}>
+        <TableHead scope="col">Produto</TableHead>…
+      </TableRow>
     </TableHeader>
     <TableBody>
-      <TableRow className="odd:bg-[color-mix(in_oklch,var(--fg)_4%,transparent)]">…</TableRow>
+      <TableRow aria-rowindex={2} className="odd:bg-[color-mix(in_oklch,var(--fg)_4%,transparent)]">…</TableRow>
     </TableBody>
   </Table>
 </div>
 
+// ações: Button variant="ghost" size="icon-sm" aria-label="Editar Capinha…"
+// empty: role="status" aria-live="polite" · loading: aria-busy + aria-live
 <Skeleton className="h-4 w-3/4" /> {/* loading */}`}
       />
     </ShowcaseSection>

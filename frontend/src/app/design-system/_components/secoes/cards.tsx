@@ -24,7 +24,7 @@ export function SecaoCards() {
   return (
     <ShowcaseSection
       id="secao-cards"
-      numero="04"
+      numero="08 · Componente"
       titulo="Cards"
       descricao="Card de produto (PDV), card de KPI (Estoque/Financeiro) e Card shadcn com header/footer. Clique no card de produto."
     >
@@ -67,7 +67,7 @@ export function SecaoCards() {
               <span className="text-xs" style={{ color: 'var(--muted)' }}>{k.rotulo}</span>
               <span className="money text-[32px] font-bold leading-tight tracking-[-0.03em]">{k.valor}</span>
               <span className="flex items-center gap-1 text-xs font-medium" style={{ color: k.cor }}>
-                <TrendingUp className="size-3" />
+                <TrendingUp className="size-3" aria-hidden />
                 {k.delta}
               </span>
             </div>

@@ -9,7 +9,7 @@ export function SecaoToasts() {
   return (
     <ShowcaseSection
       id="secao-toasts"
-      numero="07"
+      numero="11 · Componente"
       titulo="Toasts"
       descricao="Sonner (ui/sonner). Nesta página: bottom-right no desktop, full-width embaixo no mobile. Auto-dismiss em 4s; manual não some."
     >
@@ -65,6 +65,15 @@ export function SecaoToasts() {
             Disparar toast manual
           </Button>
         </div>
+      </Grupo>
+
+      <Grupo rotulo="Acessibilidade nativa (Sonner)">
+        <p className="text-sm text-muted-foreground">
+          Sucesso e info anunciam com <code className="font-mono text-xs">role=&quot;status&quot;</code> (polite);
+          erro e warning com <code className="font-mono text-xs">role=&quot;alert&quot;</code> (assertive).
+          O auto-dismiss pausa quando o mouse ou o foco do teclado está sobre o toast, e o botão de
+          fechar tem <code className="font-mono text-xs">aria-label=&quot;Close toast&quot;</code>. Nenhum wrapper extra é necessário.
+        </p>
       </Grupo>
 
       <CodeBlock

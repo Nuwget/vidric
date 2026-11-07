@@ -11,9 +11,9 @@ export function SecaoEstados() {
   return (
     <ShowcaseSection
       id="secao-estados"
-      numero="10"
+      numero="14 · Componente"
       titulo="Estados vazios e loading"
-      descricao="Empty state com CTA, skeletons de card/lista e spinner inline. O skeleton de tabela está na seção 08."
+      descricao="Empty state com CTA, skeletons de card/lista e spinner inline. O skeleton de tabela está na seção 12."
     >
       <div className="grid gap-4 lg:grid-cols-3">
         <Grupo rotulo="Empty state">
@@ -22,7 +22,7 @@ export function SecaoEstados() {
               className="grid size-12 place-items-center rounded-full"
               style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}
             >
-              <Inbox className="size-5" />
+              <Inbox className="size-5" aria-hidden />
             </span>
             <p className="font-semibold">Sem vendas hoje</p>
             <p className="text-sm" style={{ color: 'var(--muted)' }}>
@@ -60,8 +60,8 @@ export function SecaoEstados() {
                 </div>
               </div>
             ))}
-            <div className="mt-1 flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
-              <Loader2 className="size-4 animate-spin" />
+            <div role="status" aria-live="polite" className="mt-1 flex items-center gap-2 text-sm" style={{ color: 'var(--muted)' }}>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
               Carregando produtos…
             </div>
           </div>

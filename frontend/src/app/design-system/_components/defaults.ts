@@ -11,6 +11,9 @@ export interface DsConfig {
   specular: number;
   theme: Tema;
   showCode: boolean;
+  fontScale: number;
+  reducedMotion: boolean;
+  highContrast: boolean;
 }
 
 /*
@@ -30,6 +33,9 @@ export const DS_DEFAULTS: DsConfig = {
   specular: 1,
   theme: 'dark',
   showCode: true,
+  fontScale: 100,
+  reducedMotion: false,
+  highContrast: false,
 };
 
 export const DS_STORAGE_KEY = 'vidric.design-system.config';
@@ -73,6 +79,34 @@ export function aplicarConfig(c: DsConfig): void {
   set('--shadow-hover', c.shadow === 'none' ? 'none' : `0 10px 28px ${rgba(...tint, dk ? 0.28 : 0.14)}`);
 
   document.documentElement.dataset.theme = c.theme;
+
+  // Acessibilidade: zoom real (rem), movimento e contraste reduzidos simulados.
+  // As media queries reais têm o mesmo efeito via CSS escopado no shell.
+  document.documentElement.style.fontSize = c.fontScale === 100 ? '' : `${c.fontScale}%`;
+  document.documentElement.dataset.reducedMotion = String(c.reducedMotion);
+  document.documentElement.dataset.contrast = c.highContrast ? 'more' : 'normal';
+}
+
+export function limparConfigAplicada(): void {
+  const html = document.documentElement;
+  html.style.fontSize = '';
+  delete html.dataset.reducedMotion;
+  delete html.dataset.contrast;
+  // Remove os vars inline para não vazar no app ao sair da rota (o globals.css
+  // volta a valer). data-theme fica por conta do app.
+  for (const k of [
+    '--glass-bg',
+    '--glass-bg-deep',
+    '--glass-bg-thin',
+    '--glass-blur',
+    '--glass-sat',
+    '--radius',
+    '--glass-border-width',
+    '--shadow-glass',
+    '--shadow-hover',
+  ]) {
+    html.style.removeProperty(k);
+  }
 }
 
 export function buildExportCss(c: DsConfig): string {

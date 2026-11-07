@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, ShoppingCart, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -30,6 +30,68 @@ const ITENS_DEMO = [
 ];
 const TOTAL_DEMO = 87.8;
 
+function MiniCampo({ rotulo }: { rotulo: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] text-muted-foreground">{rotulo}</span>
+      <span className="h-7 rounded-md border" style={{ borderColor: 'var(--glass-border)', background: 'var(--glass-bg-thin)' }} />
+    </div>
+  );
+}
+
+function MiniBotao({ children, destaque }: { children: ReactNode; destaque?: 'primary' | 'danger' }) {
+  return (
+    <span
+      className="grid h-7 flex-1 place-items-center rounded-md text-[10px] font-semibold"
+      style={{
+        background: destaque === 'primary' ? 'var(--accent)' : destaque === 'danger' ? 'var(--danger)' : 'var(--glass-bg-thin)',
+        color: destaque ? 'var(--on-accent)' : 'var(--fg)',
+        border: destaque ? 'none' : '1px solid var(--glass-border)',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Preview({
+  titulo,
+  testid,
+  onAbrir,
+  children,
+}: {
+  titulo: string;
+  testid: string;
+  onAbrir: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div
+        aria-hidden
+        className="glass-modal flex flex-col gap-2.5 rounded-[var(--modal-radius)] p-4"
+        style={{ transform: 'scale(0.9)', transformOrigin: 'top center', pointerEvents: 'none' }}
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold tracking-[-0.02em]" style={{ color: 'var(--fg)' }}>{titulo}</span>
+          <X className="size-3.5 text-muted-foreground" />
+        </div>
+        {children}
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="-mt-3 self-start bg-transparent"
+        data-testid={testid}
+        onClick={onAbrir}
+      >
+        Ver em overlay →
+      </Button>
+    </div>
+  );
+}
+
 export function SecaoModais() {
   const [aberto, setAberto] = useState<Modal>(null);
   const [nome, setNome] = useState('');
@@ -39,28 +101,59 @@ export function SecaoModais() {
   return (
     <ShowcaseSection
       id="secao-modais"
-      numero="06"
+      numero="10 · Componente"
       titulo="Modais"
-      descricao="O coração desta página. Pagamento é o componente REAL do PDV; os demais seguem a mesma receita glass-modal. Todos têm X no topo direito."
+      descricao="Cinco tipos em prévia inline (decorativa, scale 0.9). 'Ver em overlay' abre o modal real. Pagamento é o componente REAL do PDV; os demais seguem a mesma receita glass-modal."
     >
-      <Grupo rotulo="Abrir exemplos">
-        <div className="flex flex-wrap gap-2.5">
-          <Button type="button" data-testid="abrir-modal-pagamento" onClick={() => setAberto('pagamento')}>
-            Pagamento (PDV)
-          </Button>
-          <Button type="button" variant="outline" data-testid="abrir-modal-confirmacao" onClick={() => setAberto('confirmacao')}>
-            Confirmação
-          </Button>
-          <Button type="button" variant="outline" data-testid="abrir-modal-formulario" onClick={() => setAberto('formulario')}>
-            Formulário
-          </Button>
-          <Button type="button" variant="destructive" data-testid="abrir-modal-destrutivo" onClick={() => setAberto('destrutivo')}>
-            Destrutivo
-          </Button>
-          <Button type="button" variant="outline" data-testid="abrir-modal-folha" onClick={() => setAberto('folha')}>
-            Bottom-sheet (carrinho)
-          </Button>
+      <Grupo rotulo="Prévia inline">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
+          <Preview titulo="Pagamento" testid="abrir-modal-pagamento" onAbrir={() => setAberto('pagamento')}>
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] text-muted-foreground">Total</span>
+              <span className="money text-base font-bold" style={{ color: 'var(--accent-text)' }}>{formatBRL(TOTAL_DEMO)}</span>
+            </div>
+            <MiniCampo rotulo="Valor pago" />
+            <div className="flex gap-2"><MiniBotao>Cancelar</MiniBotao><MiniBotao destaque="primary">Confirmar</MiniBotao></div>
+          </Preview>
+
+          <Preview titulo="Desativar produto?" testid="abrir-modal-confirmacao" onAbrir={() => setAberto('confirmacao')}>
+            <p className="text-[11px] text-muted-foreground">Ele sai da busca do PDV, mas o histórico permanece.</p>
+            <div className="flex gap-2"><MiniBotao>Cancelar</MiniBotao><MiniBotao destaque="primary">Confirmar</MiniBotao></div>
+          </Preview>
+
+          <Preview titulo="Novo produto" testid="abrir-modal-formulario" onAbrir={() => setAberto('formulario')}>
+            <MiniCampo rotulo="Nome" />
+            <MiniCampo rotulo="Preço de venda" />
+            <div className="flex gap-2"><MiniBotao>Cancelar</MiniBotao><MiniBotao destaque="primary">Salvar</MiniBotao></div>
+          </Preview>
+
+          <Preview titulo="Excluir produto?" testid="abrir-modal-destrutivo" onAbrir={() => setAberto('destrutivo')}>
+            <div className="flex items-center gap-1.5 rounded-md p-2 text-[10px]" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)' }}>
+              <AlertTriangle className="size-3 shrink-0" /> Esta ação não pode ser desfeita.
+            </div>
+            <div className="flex gap-2"><MiniBotao>Cancelar</MiniBotao><MiniBotao destaque="danger">Excluir</MiniBotao></div>
+          </Preview>
+
+          <Preview titulo="Carrinho" testid="abrir-modal-folha" onAbrir={() => setAberto('folha')}>
+            {ITENS_DEMO.map((i) => (
+              <div key={i.nome} className="flex items-baseline justify-between border-b pb-1" style={{ borderColor: 'var(--glass-border)' }}>
+                <span className="truncate text-[10px] font-medium">{i.nome}</span>
+                <span className="money text-[10px]">{formatBRL(i.preco)}</span>
+              </div>
+            ))}
+            <MiniBotao destaque="primary">Finalizar venda</MiniBotao>
+          </Preview>
         </div>
+      </Grupo>
+
+      <Grupo rotulo="Acessibilidade do overlay">
+        <p className="text-sm text-muted-foreground">
+          O modal real usa Radix Dialog: <code className="font-mono text-xs">role=&quot;dialog&quot;</code>,{' '}
+          <code className="font-mono text-xs">aria-modal=&quot;true&quot;</code>,{' '}
+          <code className="font-mono text-xs">aria-labelledby</code> apontando para o título, focus trap
+          (Tab cicla dentro do modal) e <kbd className="rounded border px-1 text-[10px]" style={{ borderColor: 'var(--glass-border)' }}>Esc</kbd> para
+          fechar. O bottom-sheet usa o mesmo padrão com spring de entrada.
+        </p>
       </Grupo>
 
       {/* Componente real do PDV — mesmos campos, mesmos botões, zero API aqui. */}
@@ -170,7 +263,7 @@ export function SecaoModais() {
               borderRadius: 'calc(var(--radius) * 0.7)',
             }}
           >
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
             O cadastro some do catálogo; o histórico de movimentos é mantido por auditoria.
           </div>
           <div className="flex gap-3">
@@ -222,11 +315,11 @@ export function SecaoModais() {
                   className="grid size-9 place-items-center rounded-full"
                   style={{ background: 'var(--glass-bg-thin)', color: 'var(--fg)' }}
                 >
-                  <X className="size-4" />
+                  <X className="size-4" aria-hidden />
                 </button>
               </div>
               <div className="flex items-center gap-2 text-xl font-bold tracking-[-0.022em]">
-                <ShoppingCart className="size-5" />
+                <ShoppingCart className="size-5" aria-hidden />
                 Carrinho
                 <span className="ml-auto text-xs font-normal text-muted-foreground">2 itens</span>
               </div>
@@ -275,9 +368,9 @@ export function SecaoModais() {
         codigo={`// receita única: utilities do shadcn vencem @layer components —
 // bg-transparent/ring-0/rounded cancelam bg-popover/ring-1/rounded-xl
 <DialogContent className="glass-modal bg-transparent ring-0 rounded-[var(--modal-radius)] p-6 sm:max-w-md">
-  <DialogHeader>…</DialogHeader>
-  …
+  <DialogHeader>…</DialogHeader>  {/* aria-labelledby automático */}
 </DialogContent>
+// Radix: role=dialog, aria-modal, focus trap, Esc fecha.
 
 // bottom-sheet (carrinho): scrim + spring, max-h 82dvh
 <motion.div variants={bottomSheet} initial="fechado" animate="aberto" exit="fechado"

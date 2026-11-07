@@ -20,7 +20,7 @@ export function SecaoDropdowns() {
   return (
     <ShowcaseSection
       id="secao-dropdowns"
-      numero="09"
+      numero="13 · Componente"
       titulo="Dropdowns"
       descricao="DropdownMenu do shadcn glassado. O avatar do app usa click-outside próprio — aqui, a primitiva com o mesmo visual."
     >
@@ -31,7 +31,7 @@ export function SecaoDropdowns() {
               <button
                 type="button"
                 data-testid="ds-avatar"
-                aria-label="Menu do usuário"
+                aria-label="Menu do usuário AS"
                 className="grid size-12 cursor-pointer place-items-center rounded-full text-sm font-semibold transition-transform active:scale-[0.94]"
                 style={{
                   background: 'var(--accent-soft)',
@@ -61,7 +61,7 @@ export function SecaoDropdowns() {
                 className="font-semibold text-[var(--danger-text)] focus:bg-[var(--danger-soft)] focus:text-[var(--danger-text)]"
                 onClick={() => toast.success('Sessão encerrada (demo).')}
               >
-                <LogOut />
+                <LogOut aria-hidden />
                 Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -72,16 +72,16 @@ export function SecaoDropdowns() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="outline" size="icon" aria-label="Ações do produto" data-testid="ds-acoes">
-                <MoreHorizontal />
+                <MoreHorizontal aria-hidden />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" sideOffset={8} className={GLASS_DROPDOWN}>
               <DropdownMenuItem onClick={() => toast.info('Editar (demo).')}>
-                <Pencil />
+                <Pencil aria-hidden />
                 Editar
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => toast.info('Duplicar (demo).')}>
-                <Copy />
+                <Copy aria-hidden />
                 Duplicar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -89,13 +89,22 @@ export function SecaoDropdowns() {
                 className="text-[var(--danger-text)] focus:bg-[var(--danger-soft)] focus:text-[var(--danger-text)]"
                 onClick={() => toast.success('Excluído (demo).')}
               >
-                <Trash2 />
+                <Trash2 aria-hidden />
                 Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </Grupo>
       </div>
+
+      <Grupo rotulo="Acessibilidade nativa (Radix)">
+        <p className="text-sm text-muted-foreground">
+          O trigger expõe <code className="font-mono text-xs">aria-expanded</code> e{' '}
+          <code className="font-mono text-xs">aria-haspopup=&quot;menu&quot;</code>; setas ↑↓ navegam entre itens,{' '}
+          <kbd className="rounded border px-1 text-[10px]" style={{ borderColor: 'var(--glass-border)' }}>Esc</kbd> fecha
+          e devolve o foco ao trigger, e digitar uma letra salta para o item correspondente (typeahead).
+        </p>
+      </Grupo>
 
       <CodeBlock
         codigo={`<DropdownMenu>

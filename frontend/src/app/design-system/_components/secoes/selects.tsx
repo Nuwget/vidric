@@ -17,7 +17,7 @@ export function SecaoSelects() {
   return (
     <ShowcaseSection
       id="secao-selects"
-      numero="03"
+      numero="07 · Componente"
       titulo="Selects"
       descricao="Nativo estilizado para filtros simples; custom (Radix) é o do modal de pagamento. Clique para abrir."
     >
@@ -62,7 +62,7 @@ export function SecaoSelects() {
         <div className="flex flex-col gap-2">
           <Label htmlFor="ds-select-erro">Com erro</Label>
           <Select>
-            <SelectTrigger id="ds-select-erro" aria-invalid className="h-12 w-full">
+            <SelectTrigger id="ds-select-erro" aria-invalid aria-describedby="ds-select-erro-msg" className="h-12 w-full">
               <SelectValue placeholder="Escolha a categoria" />
             </SelectTrigger>
             <SelectContent>
@@ -73,7 +73,7 @@ export function SecaoSelects() {
               ))}
             </SelectContent>
           </Select>
-          <p role="alert" className="text-sm font-semibold" style={{ color: 'var(--danger-text)' }}>
+          <p id="ds-select-erro-msg" role="alert" className="text-sm font-semibold" style={{ color: 'var(--danger-text)' }}>
             Selecione uma categoria.
           </p>
         </div>
