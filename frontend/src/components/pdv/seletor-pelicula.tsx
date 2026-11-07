@@ -14,14 +14,6 @@ import { CATEGORIA_PELICULA, SERVICO_APLICACAO } from '@/lib/pdv';
 import { formatBRL } from '@/lib/format';
 import type { Produto } from '@/types/api';
 
-const ESTILO_VIDRO = {
-  background: 'var(--glass-bg)',
-  backdropFilter: 'blur(var(--glass-blur))',
-  WebkitBackdropFilter: 'blur(var(--glass-blur))',
-  border: '1px solid var(--glass-border)',
-  boxShadow: 'var(--shadow)',
-} as const;
-
 interface Props {
   onEscolher: (produto: Produto) => void;
 }
@@ -63,10 +55,7 @@ export function SeletorPelicula({ onEscolher }: Props) {
       </button>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent
-          className="rounded-[var(--radius)] sm:max-w-md p-6 ring-0"
-          style={ESTILO_VIDRO}
-        >
+        <DialogContent className="glass rounded-[var(--radius)] sm:max-w-md p-6 ring-0">
           <DialogHeader>
             <DialogTitle>Película + aplicação</DialogTitle>
             <DialogDescription className="text-sm" style={{ color: 'var(--muted)' }}>

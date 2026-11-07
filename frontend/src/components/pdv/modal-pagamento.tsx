@@ -29,14 +29,6 @@ const FORMAS: { valor: FormaPagamento; rotulo: string }[] = [
   { valor: 'Outro', rotulo: 'Outro' },
 ];
 
-const ESTILO_VIDRO = {
-  background: 'var(--glass-bg)',
-  backdropFilter: 'blur(var(--glass-blur))',
-  WebkitBackdropFilter: 'blur(var(--glass-blur))',
-  border: '1px solid var(--glass-border)',
-  boxShadow: 'var(--shadow)',
-} as const;
-
 function comoTextoBRL(valor: number): string {
   return valor.toFixed(2).replace('.', ',');
 }
@@ -84,7 +76,7 @@ export function ModalPagamento({ aberto, total, salvando, onFechar, onConfirmar 
 
   return (
     <Dialog open={aberto} onOpenChange={(novo) => (novo ? undefined : onFechar())}>
-      <DialogContent className="rounded-[var(--radius)] sm:max-w-md p-6 ring-0" style={ESTILO_VIDRO}>
+      <DialogContent className="glass rounded-[var(--radius)] sm:max-w-md p-6 ring-0">
         <DialogHeader>
           <DialogTitle>Pagamento</DialogTitle>
           <DialogDescription className="text-sm" style={{ color: 'var(--muted)' }}>

@@ -60,8 +60,7 @@ export function BuscaProduto({ busca, onBusca, onAdicionar }: Props) {
             onClick={() => onAdicionar(produto)}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="text-left p-3.5 rounded-[14px] flex flex-col gap-1 cursor-pointer"
-            style={{ background: 'var(--surface)', border: '1px solid var(--glass-border)' }}
+            className="glass-card text-left p-3.5 flex flex-col gap-1 cursor-pointer"
           >
             <span className="text-[15px] font-semibold line-clamp-2">{produto.nome}</span>
             <span className="text-xs text-muted-foreground">

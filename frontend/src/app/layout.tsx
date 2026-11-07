@@ -26,6 +26,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" data-theme="light" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
+        {/* Pipeline de refração do liquid glass (feTurbulence → feGaussianBlur → feDisplacementMap).
+            Consumido por backdrop-filter: url(#liquid-glass) em .glass — ver globals.css. */}
+        <svg
+          width="0"
+          height="0"
+          style={{ position: 'absolute' }}
+          aria-hidden
+          focusable="false"
+        >
+          <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
+            <feGaussianBlur in="noise" stdDeviation="2" result="smoothed" />
+            <feDisplacementMap in="SourceGraphic" in2="smoothed" scale="70" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
         <Providers>{children}</Providers>
       </body>
     </html>

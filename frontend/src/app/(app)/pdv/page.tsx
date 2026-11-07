@@ -108,14 +108,7 @@ export default function PdvPage() {
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 min-h-full pb-[86px] md:pb-0">
-        <section
-          className="p-4 flex flex-col gap-3.5"
-          style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--glass-border)',
-            borderRadius: 'var(--radius)',
-          }}
-        >
+        <section className="glass p-4 flex flex-col gap-3.5">
           <SeletorPelicula onEscolher={aoEscolherPelicula} />
           <BuscaProduto busca={busca} onBusca={setBusca} onAdicionar={aoEscolherProduto} />
         </section>

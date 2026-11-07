@@ -70,12 +70,25 @@
   --surface: #f7f7f7;
   --muted: #7c7c7d;
 
+  --bg-fog-a: rgba(46, 125, 50, 0.26);
+  --bg-fog-b: rgba(83, 103, 115, 0.18); /* playground: mix(--accent, #7850b4, .5) */
+  --bg-fog-c: rgba(249, 168, 37, 0.14);
+
   --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-bg-deep: rgba(255, 255, 255, 0.63);
+  --glass-bg-thin: rgba(255, 255, 255, 0.3);
   --glass-border: rgba(0, 0, 0, 0.14);
-  --glass-blur: 18px;
+  --glass-blur: 32px;
+  --glass-sat: 180%;
+  --glass-bright: 1.05;
+  --edge-top: rgba(255, 255, 255, 0.45);
+  --edge-bottom: rgba(255, 255, 255, 0.06);
 
   --radius: 16px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-glass:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 8px 32px rgba(46, 125, 50, 0.08);
 }
 
 /* Dark — playground DEFAULTS, mode=dark */
@@ -101,12 +114,25 @@
   --surface: #1c1c23;
   --muted: #b8b8bb;
 
+  --bg-fog-a: rgba(46, 125, 50, 0.14);
+  --bg-fog-b: rgba(83, 103, 115, 0.24);
+  --bg-fog-c: rgba(249, 168, 37, 0.1);
+
   --glass-bg: rgba(255, 255, 255, 0.11);
+  --glass-bg-deep: rgba(255, 255, 255, 0.2);
+  --glass-bg-thin: rgba(255, 255, 255, 0.07);
   --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-blur: 18px;
+  --glass-blur: 32px;
+  --glass-sat: 180%;
+  --glass-bright: 1.05;
+  --edge-top: rgba(255, 255, 255, 0.16);
+  --edge-bottom: rgba(255, 255, 255, 0.04);
 
   --radius: 16px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-glass:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(83, 103, 115, 0.15);
 }
 
 @layer base {
@@ -119,6 +145,13 @@
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
+    /* Névoa estruturada atrás do vidro — é a borda dos blobs que o
+       feDisplacementMap distorce. Vidro sobre branco/preto puro não refrata nada. */
+    background-image:
+      radial-gradient(520px 420px at 78% 10%, var(--bg-fog-a), transparent 65%),
+      radial-gradient(560px 460px at 6% 82%, var(--bg-fog-b), transparent 65%),
+      radial-gradient(720px 560px at 50% 52%, var(--bg-fog-c), transparent 70%);
+    background-attachment: fixed;
   }
   button,
   a,
@@ -129,14 +162,72 @@
 }
 
 @layer components {
-  /* Liquid glass is reserved for the sidebar, header and payment modal. */
+  /*
+    Liquid glass — pipeline do playground (fonte de verdade):
+    blur + saturate + brightness, com refração real via feDisplacementMap
+    (apenas Chromium aceita url() em backdrop-filter; a segunda declaração é
+    descartada inteira onde não suportado e o frosted permanece).
+  */
   .glass {
+    position: relative;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  }
+
+  .glass {
+    backdrop-filter: blur(calc(var(--glass-blur) - 12px)) saturate(var(--glass-sat))
+      brightness(var(--glass-bright)) url(#liquid-glass);
+  }
+
+  /* Borda em gradiente (luz no topo) + aberração cromática sutil na aresta */
+  .glass::before,
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, var(--edge-top), var(--edge-bottom));
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    filter: drop-shadow(1px 0 0 rgba(255, 0, 0, 0.05)) drop-shadow(-1px 0 0 rgba(0, 255, 255, 0.05));
+    pointer-events: none;
+  }
+
+  /* Noise de vidro: sem textura o vidro parece plástico */
+  .glass::after,
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Card translúcido: a refração já acontece na camada .glass que o contém */
+  .glass-card {
+    position: relative;
+    background: var(--glass-bg-thin);
+    border: none;
+    border-radius: 14px;
     box-shadow: var(--shadow);
+  }
+
+  /* z-depth: header mais leve, sidebar mais densa */
+  header.glass {
+    --glass-blur: 24px;
+    background: var(--glass-bg-thin);
   }
 
   .surface {
@@ -167,9 +258,8 @@
 
   @media (min-width: 768px) {
     .nav-panel {
-      background: var(--glass-bg);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
+      --glass-blur: 40px;
+      background: var(--glass-bg-deep);
       border-radius: var(--radius);
       /* O drawer mobile é animado por transform; em desktop o painel é estático. */
       transform: none !important;
