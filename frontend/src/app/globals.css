@@ -72,16 +72,17 @@
 
   /* Mesh gradient: composição rica atrás do vidro (referência raycast.com) */
   --bg-mesh:
-    radial-gradient(at 20% 0%, #d4f1d4 0%, transparent 50%),
-    radial-gradient(at 80% 20%, #f0e6d2 0%, transparent 50%),
-    radial-gradient(at 50% 100%, #e8e0f0 0%, transparent 50%),
+    radial-gradient(at 20% 0%, #b8e6c4 0%, transparent 50%),
+    radial-gradient(at 80% 20%, #f0d9b8 0%, transparent 50%),
+    radial-gradient(at 50% 100%, #d8c8e8 0%, transparent 50%),
+    radial-gradient(at 90% 90%, #a8d8b8 0%, transparent 45%),
     linear-gradient(180deg, #fafaf7 0%, #f2f0eb 100%);
 
   --glass-bg: rgba(255, 255, 255, 0.38);
   --glass-bg-deep: rgba(255, 255, 255, 0.4);
-  --glass-bg-thin: rgba(255, 255, 255, 0.32);
+  --glass-bg-thin: rgba(255, 255, 255, 0.26);
   --glass-border: rgba(0, 0, 0, 0.14);
-  --glass-blur: 40px;
+  --glass-blur: 44px;
   --glass-sat: 190%;
   --glass-bright: 1.05;
   --edge: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.2) 100%);
@@ -131,7 +132,7 @@
   --glass-bg-deep: rgba(255, 255, 255, 0.05);
   --glass-bg-thin: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-blur: 40px;
+  --glass-blur: 44px;
   --glass-sat: 190%;
   --glass-bright: 1.1;
   --edge: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.12) 100%);

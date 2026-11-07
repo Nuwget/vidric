@@ -54,7 +54,7 @@ function LoginForm() {
       </div>
 
       <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Entrar</h1>
+        <h1 className="text-2xl font-semibold tracking-[-0.022em]">Entrar</h1>
         <p className="text-sm text-muted-foreground mt-1">Use o email da sua loja.</p>
       </div>
 
@@ -78,7 +78,8 @@ function LoginForm() {
             autoComplete="email"
             required
             placeholder="voce@loja.com.br"
-            className="h-12"
+            className="h-12 backdrop-blur-[20px]"
+            style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -93,7 +94,8 @@ function LoginForm() {
             autoComplete="current-password"
             required
             placeholder="••••••••"
-            className="h-12"
+            className="h-12 backdrop-blur-[20px]"
+            style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
           />
@@ -102,8 +104,12 @@ function LoginForm() {
         <Button
           type="submit"
           disabled={login.isPending}
-          className="h-12 w-full text-base font-semibold mt-1"
-          style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}
+          className="h-12 w-full text-base font-semibold mt-1 transition-transform active:scale-[0.97]"
+          style={{
+            background: 'var(--accent)',
+            color: 'var(--on-accent)',
+            boxShadow: '0 8px 24px rgba(46, 125, 50, 0.25)',
+          }}
         >
           {login.isPending ? (
             <motion.span

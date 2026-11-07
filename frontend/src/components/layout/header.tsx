@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import { BotaoSair } from '@/components/layout/sidebar';
+import { AvatarUsuario } from './avatar-usuario';
 
 interface Props {
   nomeLoja: string | null;
@@ -26,7 +26,9 @@ export function Header({ nomeLoja, nomeUsuario, onAbrirMenu, onSair }: Props) {
       <span className="text-[17px] font-semibold tracking-[-0.022em]">{nomeLoja ?? '—'}</span>
       <span className="text-sm text-muted-foreground ml-0.5 truncate">{nomeUsuario}</span>
 
-      <BotaoSair onClick={onSair} className="ml-auto" />
+      <div className="ml-auto flex items-center gap-2">
+        <AvatarUsuario nome={nomeUsuario} onSair={onSair} />
+      </div>
     </header>
   );
 }
