@@ -113,3 +113,97 @@ export interface VendaDetalhe {
 export interface ApiErro {
   erro?: string;
 }
+
+export type TipoMovimentoEstoque =
+  | 'EntradaCompra'
+  | 'SaidaVenda'
+  | 'AjustePositivo'
+  | 'AjusteNegativo'
+  | 'Perda'
+  | 'Devolucao';
+
+/** Espelha o item de movimentos de GET /api/produtos/{id}. */
+export interface MovimentoEstoque {
+  id: string;
+  tipo: TipoMovimentoEstoque;
+  quantidade: number;
+  motivo: string | null;
+  dataHora: string;
+  usuarioId: string;
+  vendaId?: string | null;
+}
+
+/** Espelha GET /api/produtos/{id} (produto + últimos 20 movimentos). */
+export interface ProdutoDetalhe {
+  produto: Produto;
+  movimentos: MovimentoEstoque[];
+}
+
+export interface CategoriaEstoque {
+  categoria: string;
+  qtdProdutos: number;
+  valorEstoque: number;
+}
+
+/** Espelha GET /api/estoque/dashboard. */
+export interface EstoqueDashboard {
+  totalProdutos: number;
+  totalSkusZerados: number;
+  totalSkusAbaixoMinimo: number;
+  valorTotalEstoque: number;
+  valorEstoqueParado: number;
+  categorias: CategoriaEstoque[];
+}
+
+export interface ProdutoParado {
+  produtoId: string;
+  nome: string;
+  modelo: string | null;
+  cor: string | null;
+  qtdEstoque: number;
+  custo: number;
+  valorImobilizado: number;
+}
+
+/** Espelha GET /api/produtos/relatorios/parados. */
+export interface RelatorioParados {
+  dias: number;
+  vendasIndisponiveis: boolean;
+  valorTotalImobilizado: number;
+  itens: ProdutoParado[];
+}
+
+/** Espelha CriarProdutoRequest (POST /api/produtos). */
+export interface CriarProdutoInput {
+  nome: string;
+  precoVenda: number;
+  modelo?: string | null;
+  cor?: string | null;
+  categoria?: string | null;
+  codigoBarras?: string | null;
+  custo?: number;
+  qtdEstoque?: number;
+  estoqueMinimo?: number;
+  observacoes?: string | null;
+}
+
+/** Espelha AtualizarProdutoRequest (PUT /api/produtos/{id}) — sem estoque. */
+export interface AtualizarProdutoInput {
+  nome: string;
+  modelo?: string | null;
+  cor?: string | null;
+  categoria?: string | null;
+  codigoBarras?: string | null;
+  precoVenda: number;
+  custo: number;
+  estoqueMinimo: number;
+  observacoes?: string | null;
+  ativo: boolean;
+}
+
+/** Espelha RegistrarMovimentoRequest — SaidaVenda é reservada ao PDV. */
+export interface RegistrarMovimentoInput {
+  tipo: Exclude<TipoMovimentoEstoque, 'SaidaVenda'>;
+  quantidade: number;
+  motivo?: string | null;
+}
