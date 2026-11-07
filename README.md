@@ -2,7 +2,7 @@
 
 Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories and application services). Each store has isolated users and data; a Super Admin manages which stores exist and can suspend/reactivate them.
 
-**Status:** Phase 3c — Finance (accrual dashboard), contas a pagar and cash register (caixa), on top of Phase 3b (POS/PDV), Phase 3a (catalog + stock + dead-stock) and the Phase 2 Super Admin panel.
+**Status:** Phase 4 — Next.js storefront (liquid-glass login, PDV for the counter, Super Admin placeholder), running on top of Phase 3c (Finance/accrual + contas a pagar + caixa), Phase 3b (POS API), Phase 3a (catalog + stock) and the Phase 2 Super Admin panel.
 
 ## Stack
 
@@ -12,6 +12,8 @@ Multi-tenant SaaS for gallery phone shops (screen protectors, cases, accessories
 - Multi-tenancy: single database, `LojaId` column + EF Core global query filter
 - Roles: `SuperAdmin`, `AdminLoja`, `Funcionario`
 - Swagger with JWT "Authorize" button
+- Frontend: Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + shadcn/ui, TanStack Query, Axios, Framer Motion, sonner
+- Frontend tests: Playwright (Chromium) at 1440px and 375px
 
 ## Solution layout
 
@@ -23,6 +25,12 @@ LojaGaleria.sln
     └── LojaGaleria.API/            controllers, auth, middleware
 └── tests/
     └── LojaGaleria.Tests/          xUnit (stock rules, sales concurrency/payments, finance accrual/cash, tenant isolation)
+└── frontend/
+    ├── src/app/                    (auth)/login, (app)/pdv, (app)/admin, layout + globals.css
+    ├── src/components/             layout (sidebar/header/caixa banner), pdv (busca/carrinho/pagamento), ui (shadcn)
+    ├── src/lib/                    axios client + interceptors, session/JWT, PDV cart rules, format, motion
+    ├── e2e/                        Playwright checklist (login, layout, PDV, backend rules, viewports)
+    └── theme-playground/ (repo root) design source of truth for the CSS tokens
 ```
 
 ## Running locally
@@ -50,6 +58,45 @@ In production, provide the key via the `Jwt__Key` environment variable instead o
 - Password: `Admin@123` — **change this before any real deployment.**
 
 The SuperAdmin token has no `loja_id` claim and bypasses tenant filters. Store users always carry a `loja_id` claim and only see their own store's data.
+
+## Running the frontend
+
+Prerequisites: [Node.js 20+](https://nodejs.org). Start the API on `http://localhost:5080` first (see above).
+
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:3000
+```
+
+`NEXT_PUBLIC_API_URL` defaults to `http://localhost:5080`; set it to point the app at another API. The API allows this origin through the `Frontend` CORS policy.
+
+Create a store to log into (the seeded SuperAdmin does not have a PDV):
+
+```bash
+curl -X POST http://localhost:5080/api/auth/registrar-loja \
+  -H 'Content-Type: application/json' \
+  -d '{"nomeLoja":"Galeria Vidric","nomeAdmin":"Ana Souza","emailAdmin":"demo@vidric.app","senhaAdmin":"Demo@123"}'
+```
+
+Validation suite (needs the API running; it seeds, sells and suspends real data on the demo store):
+
+```bash
+cd frontend
+npx playwright test                        # 27 checks: login, layout, PDV, backend rules, 1440px + 375px
+npx playwright show-report playwright-report
+```
+
+Screenshots land in `frontend/screenshots/` (gitignored, same policy as `theme-playground/screenshots/`).
+
+**Frontend rules that mirror the backend:**
+
+- Session lives in `localStorage` under `vidric.session`; the Axios request interceptor attaches the bearer token, the response interceptor sends an expired session (401) or a suspended store (403) back to `/login` with the reason.
+- Cash sales are only offered when a caixa is open: the yellow "Caixa fechado" banner reads `GET /api/caixa/atual` (404 = closed) and a 400 from the API surfaces the backend message verbatim.
+- Selling the last unit in two tabs is expected to produce one 201 and one 409; the 409 toast tells the operator to refresh the search.
+- Picking "+ Película c/ Aplicação" always adds two cart lines — the protector (deducts stock) and the R$ 10,00 application service (does not).
+- Partial payment is allowed and stays as `Parcial` (fiado); the CPF field is optional but must be complete when started.
+- Visual language comes from `theme-playground/index.html`: the CSS variables are copied verbatim into `frontend/src/app/globals.css`, Vidric green `#2E7D32` is the identity, and the breakpoints (768px / 1024px) match the playground.
 
 ## API overview
 
@@ -113,4 +160,5 @@ Suspension is enforced in two places: login returns 403 for users of inactive st
 
 - `Jwt:Key` is never committed; `appsettings.json` ships an empty placeholder.
 - Local SQLite files (`*.db*`) and `appsettings.Development.json` are gitignored.
-- Pre-deploy backlog: rate limiting on login, stronger password policy, HTTPS enforcement, forced password change for the seeded admin, CORS when the frontend lands.
+- CORS is restricted to the frontend origin (`http://localhost:3000` in development); add the production origin to the `Frontend` policy in `Program.cs` when deploying.
+- Pre-deploy backlog: rate limiting on login, stronger password policy, HTTPS enforcement, forced password change for the seeded admin, refresh tokens (today an 8h JWT simply expires and the operator logs in again).
