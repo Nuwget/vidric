@@ -1,0 +1,178 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Tokens copied from theme-playground/index.html (Vidric green preset, values
+  resolved by its apply()). The playground is the source of truth for the theme.
+*/
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+  --color-sidebar-ring: var(--accent);
+  --color-sidebar-border: var(--glass-border);
+  --color-sidebar-accent-foreground: var(--accent-text);
+  --color-sidebar-accent: var(--accent-soft);
+  --color-sidebar-primary-foreground: var(--on-accent);
+  --color-sidebar-primary: var(--accent);
+  --color-sidebar-foreground: var(--fg);
+  --color-sidebar: var(--surface);
+  --color-ring: var(--accent);
+  --color-input: var(--glass-border);
+  --color-border: var(--glass-border);
+  --color-destructive: var(--danger);
+  --color-accent-foreground: var(--accent-text);
+  --color-accent: var(--accent-soft);
+  --color-muted-foreground: var(--muted);
+  --color-muted: var(--surface);
+  --color-secondary-foreground: var(--fg);
+  --color-secondary: var(--surface);
+  --color-primary-foreground: var(--on-accent);
+  --color-primary: var(--accent);
+  --color-popover-foreground: var(--fg);
+  --color-popover: var(--surface);
+  --color-card-foreground: var(--fg);
+  --color-card: var(--surface);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Light — playground DEFAULTS, mode=light */
+:root,
+[data-theme='light'] {
+  --accent: #2e7d32;
+  --accent-brand: #2e7d32;
+  --accent-text: #2e7d32;
+  --accent-strong: #286e2c;
+  --accent-soft: rgba(46, 125, 50, 0.14);
+  --on-accent: #ffffff;
+
+  --danger: #d32f2f;
+  --danger-text: #d32f2f;
+  --danger-soft: rgba(211, 47, 47, 0.16);
+
+  --warning: #f9a825;
+  --warning-text: #8d6708;
+  --warning-soft: rgba(249, 168, 37, 0.18);
+
+  --bg: #ffffff;
+  --fg: #1d1d1f;
+  --surface: #f7f7f7;
+  --muted: #7c7c7d;
+
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(0, 0, 0, 0.14);
+  --glass-blur: 18px;
+
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark — playground DEFAULTS, mode=dark */
+[data-theme='dark'],
+.dark {
+  --accent: #2e7d32;
+  --accent-brand: #86b488;
+  --accent-text: #86b488;
+  --accent-strong: #286e2c;
+  --accent-soft: rgba(46, 125, 50, 0.14);
+  --on-accent: #ffffff;
+
+  --danger: #d32f2f;
+  --danger-text: #dd5d5d;
+  --danger-soft: rgba(211, 47, 47, 0.16);
+
+  --warning: #f9a825;
+  --warning-text: #fbc266;
+  --warning-soft: rgba(249, 168, 37, 0.18);
+
+  --bg: #0b0b12;
+  --fg: #f5f5f7;
+  --surface: #1c1c23;
+  --muted: #b8b8bb;
+
+  --glass-bg: rgba(255, 255, 255, 0.11);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: 18px;
+
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  a,
+  input,
+  select {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  /* Liquid glass is reserved for the sidebar, header and payment modal. */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .surface {
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    border-radius: calc(var(--radius) * 0.85);
+  }
+
+  .brand-text {
+    background: linear-gradient(120deg, var(--accent-brand), var(--fg));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .money {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+    Nav drawer do playground: painel sólido abaixo de 768px (o vidro translúcido
+    sobre a página escurecida ficava ilegível) e vidro normal acima.
+  */
+  .nav-panel {
+    background: var(--surface);
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  @media (min-width: 768px) {
+    .nav-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--radius);
+      /* O drawer mobile é animado por transform; em desktop o painel é estático. */
+      transform: none !important;
+    }
+  }
+}
