@@ -10,12 +10,12 @@ test.describe('Fase 4 — login e guard', () => {
     await expect(card).toContainText('Entrar');
 
     const filtro = await card.evaluate((el) => getComputedStyle(el).backdropFilter);
-    expect(filtro).toContain('blur(20px)');
-    expect(filtro).toContain('saturate(1.8)');
+    expect(filtro).toContain('blur(28px)');
+    expect(filtro).toContain('saturate(1.9)');
     expect(filtro).toContain('url("#liquid-glass")');
 
     const fundo = await card.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(fundo).toBe('rgba(255, 255, 255, 0.5)');
+    expect(fundo).toBe('rgba(255, 255, 255, 0.38)');
   });
 
   test('T8 acessar /pdv sem token redireciona para /login', async ({ page }) => {
