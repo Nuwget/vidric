@@ -10,7 +10,7 @@ test.describe('Fase 4 — login e guard', () => {
     await expect(card).toContainText('Entrar');
 
     const filtro = await card.evaluate((el) => getComputedStyle(el).backdropFilter);
-    expect(filtro).toContain('blur(28px)');
+    expect(filtro).toContain('blur(32px)');
     expect(filtro).toContain('saturate(1.9)');
     expect(filtro).toContain('url("#liquid-glass")');
 

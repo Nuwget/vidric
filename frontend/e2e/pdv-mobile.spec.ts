@@ -86,7 +86,7 @@ test.describe('T25 + T27 — mobile 375px', () => {
     await alturaMinima(page, '[data-testid="busca-produto"]');
     await alturaMinima(page, '[data-testid="abrir-carrinho"]');
     await alturaMinima(page, 'button[aria-label="Abrir menu"]');
-    await alturaMinima(page, 'header button:has-text("Sair")');
+    await alturaMinima(page, 'header button[aria-label="Menu do usuário"]');
 
     await page.getByTestId('abrir-carrinho').click();
     const folha = page.locator('#carrinho-folha');

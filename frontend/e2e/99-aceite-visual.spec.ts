@@ -10,7 +10,20 @@ async function capturar(page: Page, nome: string, tema: 'light' | 'dark'): Promi
   await page.screenshot({ path: `screenshots/${nome}.png`, fullPage: false });
 }
 
-test('capturas de aceite do liquid glass no PDV', async ({ page, request }) => {
+test('capturas de aceite do liquid glass', async ({ page, request }) => {
+  // Login em vidro, antes de qualquer sessão
+  await page.goto('/login');
+  await expect(page.locator('.glass')).toBeVisible();
+  for (const { largura, altura } of [
+    { largura: 1440, altura: 900 },
+    { largura: 375, altura: 812 },
+  ]) {
+    await page.setViewportSize({ width: largura, height: altura });
+    await page.waitForTimeout(600);
+    await capturar(page, `login-vidro-light-${largura}`, 'light');
+    await capturar(page, `login-vidro-dark-${largura}`, 'dark');
+  }
+
   const sessao = await autenticar(request, DEMO);
   await entrar(page, sessao, '/pdv');
   await esperarPdvPronto(page);
