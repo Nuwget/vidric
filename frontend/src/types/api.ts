@@ -207,3 +207,66 @@ export interface RegistrarMovimentoInput {
   quantidade: number;
   motivo?: string | null;
 }
+
+/** Espelha ResumoContasPagar (ServicoFinanceiro). */
+export interface ResumoContasPagar {
+  total: number;
+  pago: number;
+  emAberto: number;
+  vencidas: number;
+}
+
+/** Espelha DashboardFinanceiro — vendido ≠ recebido por design (competência vs. caixa). */
+export interface DashboardFinanceiro {
+  periodo: { dataInicio: string; dataFim: string };
+  vendido: number;
+  recebido: number;
+  emAberto: number;
+  recebidoPorForma: Record<'dinheiro' | 'pix' | 'cartaoDebito' | 'cartaoCredito' | 'outro', number>;
+  contasAPagar: ResumoContasPagar;
+  qtdVendas: number;
+  ticketMedio: number;
+}
+
+/** Espelha VendaPorDia — série diária completa (dias sem venda vêm zerados). */
+export interface VendaPorDia {
+  data: string;
+  vendido: number;
+  recebido: number;
+  qtdVendas: number;
+}
+
+/** Espelha MovimentoCaixaItem — valor já assinado pelo backend (positivo entrada). */
+export interface MovimentoCaixaItem {
+  tipo: string;
+  valor: number;
+  descricao: string | null;
+  dataHora: string;
+  vendaId: string | null;
+  contaPagarId: string | null;
+}
+
+/** Espelha FluxoCaixa. */
+export interface FluxoCaixa {
+  entradas: number;
+  saidas: number;
+  saldo: number;
+  movimentos: MovimentoCaixaItem[];
+}
+
+/** Espelha AReceberDto — fiado em aberto, mais antigo primeiro. */
+export interface VendaAReceber {
+  id: string;
+  dataHora: string;
+  cpfCliente: string | null;
+  total: number;
+  totalPago: number;
+  saldo: number;
+  status: StatusVenda;
+}
+
+/** Espelha PagamentoRequest (POST /api/vendas/{id}/pagamentos). */
+export interface RegistrarPagamentoInput {
+  forma: FormaPagamento;
+  valor: number;
+}
