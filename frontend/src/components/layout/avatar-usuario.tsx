@@ -45,7 +45,7 @@ export function AvatarUsuario({ nome, onSair }: Props) {
       <button
         type="button"
         data-testid="avatar-usuario"
-        aria-label="Menu do usuário"
+        aria-label={`Menu do usuário: ${iniciais(nome)}`}
         aria-expanded={aberto}
         onClick={() => setAberto((atual) => !atual)}
         className="size-12 grid place-items-center rounded-full text-sm font-semibold cursor-pointer transition-transform active:scale-[0.94]"
