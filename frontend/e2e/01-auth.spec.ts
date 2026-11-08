@@ -16,8 +16,9 @@ test.describe('Fase 4 — login e guard', () => {
     expect(filtro).toContain('saturate(1.9)');
     expect(filtro).toContain('url("#liquid-glass")');
 
-    const fundo = await card.evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(fundo).toBe('rgba(255, 255, 255, 0.38)');
+    // O fill vive em camadas de background-image (receita sem pseudos).
+    const fundo = await card.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(fundo).toContain('linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.38))');
   });
 
   test('T8 acessar /pdv sem token redireciona para /login', async ({ page }) => {

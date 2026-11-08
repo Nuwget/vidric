@@ -46,7 +46,7 @@ html.ds-active [data-sonner-toaster]:not(.ds-toaster) { display: none !important
 /* O Sonner monta um <section aria-label> mesmo sem toasts; esconder só o ol
    deixaria dois landmarks "Notifications" (axe landmark-unique). */
 html.ds-active section[aria-label="Notifications alt+T"]:not(.ds-shell section) { display: none !important; }
-.ds-shell .glass::before, .ds-shell .glass-card::before { padding: var(--glass-border-width, 1px); }
+.ds-shell .glass, .ds-shell .glass-card { border-width: var(--glass-border-width, 1px); }
 .ds-shell .surface { border-width: var(--glass-border-width, 1px); }
 .ds-shell[data-show-code="false"] .ds-code { display: none; }
 

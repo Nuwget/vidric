@@ -16,10 +16,10 @@ interface Token {
 
 const TOKENS: Token[] = [
   { var: '--fg', light: '#1d1d1f', dark: '#f5f5f7', uso: 'Texto principal', texto: true },
-  { var: '--muted', light: '#7c7c7d', dark: '#b8b8bb', uso: 'Texto secundário', texto: true },
-  { var: '--accent-text', light: '#2e7d32', dark: '#86b488', uso: 'Links e destaques', texto: true },
-  { var: '--danger-text', light: '#d32f2f', dark: '#dd5d5d', uso: 'Mensagens de erro', texto: true },
-  { var: '--warning-text', light: '#8e6015', dark: '#fbc266', uso: 'Alertas', texto: true },
+  { var: '--muted', light: '#656567', dark: '#b8b8bb', uso: 'Texto secundário', texto: true },
+  { var: '--accent-text', light: '#286e2c', dark: '#86b488', uso: 'Links e destaques', texto: true },
+  { var: '--danger-text', light: '#ad2727', dark: '#e78d8d', uso: 'Mensagens de erro', texto: true },
+  { var: '--warning-text', light: '#845914', dark: '#fbc266', uso: 'Alertas', texto: true },
   { var: '--on-accent', light: '#ffffff', dark: '#ffffff', uso: 'Texto sobre o accent', texto: true },
   { var: '--accent', light: '#2e7d32', dark: '#2e7d32', uso: 'Botão primary / foco' },
   { var: '--accent-strong', light: '#286e2c', dark: '#286e2c', uso: 'Hover do primary' },
@@ -29,9 +29,9 @@ const TOKENS: Token[] = [
   { var: '--surface', light: '#f7f7f7', dark: '#1c1c23', uso: 'Cards sólidos' },
   { var: '--glass-bg', light: 'rgba(255, 255, 255, 0.38)', dark: 'rgba(255, 255, 255, 0.08)', uso: 'Painéis de vidro' },
   { var: '--glass-border', light: 'rgba(0, 0, 0, 0.14)', dark: 'rgba(255, 255, 255, 0.14)', uso: 'Bordas do vidro' },
-  { var: '--accent-soft', light: 'rgba(46, 125, 50, 0.14)', dark: 'rgba(46, 125, 50, 0.14)', uso: 'Realce suave / hover' },
-  { var: '--danger-soft', light: 'rgba(211, 47, 47, 0.16)', dark: 'rgba(211, 47, 47, 0.16)', uso: 'Fundo de erro' },
-  { var: '--warning-soft', light: 'rgba(249, 168, 37, 0.18)', dark: 'rgba(249, 168, 37, 0.18)', uso: 'Fundo de aviso' },
+  { var: '--accent-soft', light: '#e2ede2', dark: '#101b16', uso: 'Realce suave / hover' },
+  { var: '--danger-soft', light: '#f8dede', dark: '#2b1117', uso: 'Fundo de erro' },
+  { var: '--warning-soft', light: '#feefd8', dark: '#362715', uso: 'Fundo de aviso' },
 ];
 
 const FUNDO = { light: '#ffffff', dark: '#0b0b12' } as const;
@@ -122,18 +122,19 @@ export function SecaoColors() {
         <p className="text-sm text-muted-foreground">
           Texto normal exige <span className="font-semibold" style={{ color: 'var(--fg)' }}>≥ 4.5:1</span>;
           texto grande (≥ 24px ou ≥ 18.66px bold) exige <span className="font-semibold" style={{ color: 'var(--fg)' }}>≥ 3:1</span>.
-          O verde Vidric <code className="font-mono text-xs">#2E7D32</code> é a identidade — sobre fundo claro
-          passa como texto normal; no dark o <code className="font-mono text-xs">--accent-text</code> clareia
-          para <code className="font-mono text-xs">#86B488</code> para manter a leitura.
+          O verde Vidric <code className="font-mono text-xs">#2E7D32</code> é a identidade (botões e foco);
+          os tons de texto escurecem no light (<code className="font-mono text-xs">--accent-text</code>{' '}
+          <code className="font-mono text-xs">#286E2C</code>) e clareiam no dark
+          (<code className="font-mono text-xs">#86B488</code>) para manter ≥ 4.5:1 sobre os fundos soft.
         </p>
       </Grupo>
 
       <CodeBlock
         codigo={`:root {
   --accent: #2e7d32;        /* identidade Vidric */
-  --accent-text: #2e7d32;   /* light */
+  --accent-text: #286e2c;   /* light: AA sobre o soft */
   --fg: #1d1d1f;
-  --muted: #7c7c7d;
+  --muted: #656567;
 }
 [data-theme='dark'] {
   --accent-text: #86b488;   /* clareia p/ contraste */

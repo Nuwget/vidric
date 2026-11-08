@@ -126,7 +126,7 @@ export function buildExportCss(c: DsConfig): string {
   const linhas = vars.map((k) => `  ${k}: ${cs.getPropertyValue(k).trim()};`).join('\n');
   const notaBorda =
     c.borderWidth !== 1
-      ? '\n  /* --glass-border-width precisa de .glass::before { padding: var(--glass-border-width); } no globals.css */'
+      ? '\n  /* --glass-border-width precisa de .glass { border-width: var(--glass-border-width); } no globals.css */'
       : '';
   return `/* Design System — Vidric · tema ${c.theme} · valores computados em /design-system (dev) */\n:root {\n${linhas}${notaBorda}\n}`;
 }

@@ -13,7 +13,7 @@ const VARIANTES: { nome: string; variant: Variante; hover: string; fg: string; b
   { nome: 'Primary', variant: 'default', hover: 'bg-primary/80', fg: '#ffffff', bg: '#2e7d32' },
   { nome: 'Secondary', variant: 'secondary', hover: 'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]', fg: '#1d1d1f', bg: '#f7f7f7' },
   { nome: 'Ghost', variant: 'ghost', hover: 'bg-muted text-foreground', fg: '#1d1d1f', bg: '#ffffff' },
-  { nome: 'Destructive', variant: 'destructive', hover: 'bg-destructive/20', fg: '#d32f2f', bg: '#fbeaea' },
+  { nome: 'Destructive', variant: 'destructive', hover: 'bg-[var(--danger)] text-white', fg: '#ad2727', bg: '#f8dede' },
 ];
 
 const ESTADOS = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'] as const;

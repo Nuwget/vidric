@@ -29,8 +29,9 @@ test('D1: título, subtítulo e as 14 seções presentes', async ({ page }) => {
 });
 
 test('D2 (checklist 6): slider de opacidade altera o vidro ao vivo', async ({ page }) => {
+  // O fill vive em camadas de background-image (receita sem pseudos), não em background-color.
   const cor = () =>
-    page.getByTestId('secao-cards').evaluate((el) => getComputedStyle(el).backgroundColor);
+    page.getByTestId('secao-cards').evaluate((el) => getComputedStyle(el).backgroundImage);
   const antes = await cor();
   await page.getByTestId('slider-opacidade').getByRole('slider').press('End'); // 0.60
   await expect.poll(cor).not.toBe(antes);

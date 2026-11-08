@@ -59,23 +59,67 @@ export async function rodarAuditoriaAxe(): Promise<ResultadoAxe> {
   };
 }
 
+/* O fill do vidro vive em background-image (receita sem pseudos):
+   linear-gradient(cor, cor) é uma camada uniforme mensurable. */
+function partirTopLevel(s: string): string[] {
+  const partes: string[] = [];
+  let prof = 0;
+  let atual = '';
+  for (const ch of s) {
+    if (ch === '(') prof++;
+    else if (ch === ')') prof--;
+    if (ch === ',' && prof === 0) {
+      partes.push(atual.trim());
+      atual = '';
+    } else atual += ch;
+  }
+  partes.push(atual.trim());
+  return partes;
+}
+
+function camadasUniformes(backgroundImage: string): RGBA[] {
+  const camadas: RGBA[] = [];
+  const re = /linear-gradient\(((?:[^()]|\([^()]*\))*)\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(backgroundImage))) {
+    const args = partirTopLevel(m[1]);
+    if (args.length !== 2) continue;
+    const a = parseColor(args[0]);
+    const b = parseColor(args[1]);
+    if (a && b && a.r === b.r && a.g === b.g && a.b === b.b && a.a === b.a && a.a > 0) camadas.push(a);
+  }
+  return camadas;
+}
+
+function camadaValida(c: RGBA | null): c is RGBA {
+  return !!c && c.a > 0 && Number.isFinite(c.r) && Number.isFinite(c.g) && Number.isFinite(c.b);
+}
+
 function fundoEfetivo(el: Element): RGBA {
-  let acum: RGBA = { r: 0, g: 0, b: 0, a: 0 };
+  // Camadas de dentro para fora; a compilação final inverte (ancestral por baixo).
+  const camadas: RGBA[] = [];
   let atual: Element | null = el;
   while (atual) {
-    const bg = parseColor(getComputedStyle(atual).backgroundColor);
-    // Camadas internas (acum) ficam por cima; o ancestral entra por baixo.
-    if (bg && bg.a > 0 && Number.isFinite(bg.r) && Number.isFinite(bg.g) && Number.isFinite(bg.b)) {
-      acum = compositeOver(acum, bg);
-      if (acum.a >= 0.999) return acum;
-    }
+    const cs = getComputedStyle(atual);
+    const bg = parseColor(cs.backgroundColor);
+    if (camadaValida(bg)) camadas.push(bg);
+    camadas.push(...camadasUniformes(cs.backgroundImage).filter(camadaValida));
     atual = atual.parentElement;
   }
   // Sem ancestral opaco (o mesh é background-image): usa o token --bg por baixo.
   const base = parseColor(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
-  if (base && Number.isFinite(base.r)) return compositeOver(acum, base);
-  const temaEscuro = document.documentElement.dataset.theme === 'dark';
-  return temaEscuro ? { r: 11, g: 11, b: 18, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
+  let fundo: RGBA =
+    base && Number.isFinite(base.r)
+      ? base
+      : document.documentElement.dataset.theme === 'dark'
+        ? { r: 11, g: 11, b: 18, a: 1 }
+        : { r: 255, g: 255, b: 255, a: 1 };
+  // Sem break anticipado: o body é opaco, mas as camadas internas (fill do
+  // vidro, bg do próprio elemento) precisam ser compostas por cima dele.
+  for (let i = camadas.length - 1; i >= 0; i--) {
+    fundo = compositeOver(camadas[i], fundo);
+  }
+  return fundo;
 }
 
 const fmt = (c: RGBA) => `rgb(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)})`;

@@ -52,23 +52,23 @@
 [data-theme='light'] {
   --accent: #2e7d32;
   --accent-brand: #2e7d32;
-  --accent-text: #2e7d32;
+  --accent-text: #286e2c; /* playground: darken(--accent, .12) — AA sobre o soft */
   --accent-strong: #286e2c;
-  --accent-soft: rgba(46, 125, 50, 0.14);
+  --accent-soft: #e2ede2; /* playground: mix(--accent, --bg, .86) — opaco p/ axe medir */
   --on-accent: #ffffff;
 
   --danger: #d32f2f;
-  --danger-text: #d32f2f;
-  --danger-soft: rgba(211, 47, 47, 0.16);
+  --danger-text: #ad2727; /* playground: darken(--danger, .18) */
+  --danger-soft: #f8dede; /* playground: mix(--danger, --bg, .84) */
 
   --warning: #f9a825;
-  --warning-text: #8e6015; /* playground: darken(--warning, .43) */
-  --warning-soft: rgba(249, 168, 37, 0.18);
+  --warning-text: #845914; /* playground: darken(--warning, .47) */
+  --warning-soft: #feefd8; /* playground: mix(--warning, --bg, .82) */
 
   --bg: #ffffff;
   --fg: #1d1d1f;
   --surface: #f7f7f7;
-  --muted: #7c7c7d;
+  --muted: #656567; /* playground: mix(--fg, --bg, .32) — AA sobre surface */
 
   /* Mesh gradient: composição rica atrás do vidro (referência raycast.com) */
   --bg-mesh:
@@ -86,6 +86,7 @@
   --glass-sat: 190%;
   --glass-bright: 1.05;
   --edge: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.2) 100%);
+  --glass-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 
   --radius: 16px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -106,16 +107,16 @@
   --accent-brand: #86b488;
   --accent-text: #86b488;
   --accent-strong: #286e2c;
-  --accent-soft: rgba(46, 125, 50, 0.14);
+  --accent-soft: #101b16; /* playground: mix(--accent, --bg, .86) — opaco p/ axe medir */
   --on-accent: #ffffff;
 
   --danger: #d32f2f;
-  --danger-text: #dd5d5d;
-  --danger-soft: rgba(211, 47, 47, 0.16);
+  --danger-text: #e78d8d; /* playground: lighten(--danger, .45) */
+  --danger-soft: #2b1117; /* playground: mix(--danger, --bg, .84) */
 
   --warning: #f9a825;
   --warning-text: #fbc266; /* playground: lighten(--warning, .30) */
-  --warning-soft: rgba(249, 168, 37, 0.18);
+  --warning-soft: #362715; /* playground: mix(--warning, --bg, .82) */
 
   --bg: #0b0b12;
   --fg: #f5f5f7;
@@ -182,7 +183,8 @@
   */
   .glass {
     position: relative;
-    background: var(--glass-bg);
+    --glass-fill: var(--glass-bg);
+    border: 1px solid transparent;
     border-radius: var(--radius);
     box-shadow: var(--shadow-glass);
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
@@ -194,44 +196,22 @@
       brightness(var(--glass-bright)) url(#liquid-glass);
   }
 
-  /* Borda em gradiente 135deg (luz direcional) + aberração cromática sutil na aresta */
-  .glass::before,
-  .glass-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--edge);
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    filter: drop-shadow(1px 0 0 rgba(255, 0, 0, 0.05)) drop-shadow(-1px 0 0 rgba(0, 255, 255, 0.05));
-    pointer-events: none;
-  }
-
-  /* Noise de vidro: sem textura o vidro parece plástico */
-  .glass::after,
-  .glass-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    opacity: 0.035;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Edge em gradiente 135deg (luz direcional) + noise como camadas do próprio
+     elemento, sem pseudos: pseudos com background bloqueavam a medição de
+     contraste do axe (color-contrast incomplete) em todo texto no vidro. */
+  .glass,
+  .glass-card {
+    background:
+      var(--glass-noise) repeat padding-box,
+      linear-gradient(var(--glass-fill), var(--glass-fill)) padding-box,
+      var(--edge) border-box;
   }
 
   /* Card translúcido: a refração já acontece na camada .glass que o contém */
   .glass-card {
     position: relative;
-    background: var(--glass-bg-thin);
-    border: none;
+    --glass-fill: var(--glass-bg-thin);
+    border: 1px solid transparent;
     border-radius: 14px;
     box-shadow: var(--shadow);
     transition:
@@ -262,7 +242,7 @@
   /* z-depth: header mais leve, sidebar mais densa */
   header.glass {
     --glass-blur: 24px;
-    background: var(--glass-bg-thin);
+    --glass-fill: var(--glass-bg-thin);
   }
 
   .surface {
@@ -287,14 +267,14 @@
     sobre a página escurecida ficava ilegível) e vidro normal acima.
   */
   .nav-panel {
-    background: var(--surface);
+    --glass-fill: var(--surface);
     border-radius: 0 var(--radius) var(--radius) 0;
   }
 
   @media (min-width: 768px) {
     .nav-panel {
       --glass-blur: 48px;
-      background: var(--glass-bg-deep);
+      --glass-fill: var(--glass-bg-deep);
       border-radius: var(--radius);
       /* O drawer mobile é animado por transform; em desktop o painel é estático. */
       transform: none !important;

@@ -37,6 +37,12 @@ async function definirTema(page: Page, tema: 'light' | 'dark', largura: number) 
   await page.waitForTimeout(400);
 }
 
+interface BadgeMedicao {
+  nome: string;
+  ratio: number | null;
+  axe: 'pass' | 'incomplete' | 'violation' | 'ausente';
+}
+
 interface Combo {
   viewport: number;
   tema: string;
@@ -44,6 +50,30 @@ interface Combo {
   passes: number;
   incompletos: number;
   violacoes: Array<{ id: string; impact: string | null; help: string; nodes: number }>;
+  badges: BadgeMedicao[];
+}
+
+/* Pré-5b (coach): os 4 badges semânticos devem sair de "incomplete" para "pass"
+   no axe E medir ≥ 4.5:1 reais em todos os combos — sem pseudos bloqueando. */
+const BADGES_SEMANTICOS = ['Sucesso', 'Erro', 'Warning', 'Info'] as const;
+
+async function medirBadges(page: Page, res: { passes: Array<{ id: string; nodes: Array<{ html: string }> }>; incomplete: Array<{ id: string; nodes: Array<{ html: string }> }>; violations: Array<{ id: string; nodes: Array<{ html: string }> }> }): Promise<BadgeMedicao[]> {
+  const cores = await page.evaluate((nomes) => {
+    const spans = Array.from(document.querySelectorAll('#secao-badges span'));
+    return nomes.map((nome) => {
+      const el = spans.find((s) => s.textContent?.trim() === nome);
+      if (!el) return { nome, fg: null as string | null, bg: null as string | null };
+      const cs = getComputedStyle(el);
+      return { nome, fg: cs.color, bg: cs.backgroundColor };
+    });
+  }, [...BADGES_SEMANTICOS]);
+  const bucket = (lista: Array<{ id: string; nodes: Array<{ html: string }> }>, nome: string) =>
+    lista.find((r) => r.id === 'color-contrast')?.nodes.some((n) => n.html.includes(`>${nome}</span>`)) ?? false;
+  return cores.map(({ nome, fg, bg }) => ({
+    nome,
+    ratio: fg && bg ? ratioEntre(fg, bg) : null,
+    axe: bucket(res.passes, nome) ? 'pass' : bucket(res.incomplete, nome) ? 'incomplete' : bucket(res.violations, nome) ? 'violation' : 'ausente',
+  }));
 }
 
 test('A1 (checklist 22–25): axe WCAG AA nos 4 combos — zero critical/serious + report', async ({ page }) => {
@@ -60,6 +90,7 @@ test('A1 (checklist 22–25): axe WCAG AA nos 4 combos — zero critical/serious
       await page.waitForTimeout(500);
       const res = await new AxeBuilder({ page }).withTags(TAGS).analyze();
       const critSer = res.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+      const badges = await medirBadges(page, res);
       combos.push({
         viewport: largura,
         tema,
@@ -67,11 +98,17 @@ test('A1 (checklist 22–25): axe WCAG AA nos 4 combos — zero critical/serious
         passes: res.passes.length,
         incompletos: res.incomplete.length,
         violacoes: res.violations.map((v) => ({ id: v.id, impact: v.impact ?? null, help: v.help, nodes: v.nodes.length })),
+        badges,
       });
       expect(
         critSer.map((v) => `${v.id}: ${v.help} :: ${v.nodes.map((n) => `[${n.target.join(' ')}] ${n.html}`).join(' | ')}`),
         `axe critical/serious em ${tema}/${largura}`,
       ).toEqual([]);
+      for (const b of badges) {
+        expect(b.ratio, `badge ${b.nome} em ${tema}/${largura}: ratio real`).not.toBeNull();
+        expect(b.ratio!, `badge ${b.nome} em ${tema}/${largura}: ${b.ratio}:1`).toBeGreaterThanOrEqual(4.5);
+        expect(b.axe, `badge ${b.nome} em ${tema}/${largura}: bucket axe`).toBe('pass');
+      }
     }
   }
 
@@ -93,6 +130,7 @@ test('A1 (checklist 22–25): axe WCAG AA nos 4 combos — zero critical/serious
     url: page.url(),
     totalCriticoSerio,
     combos,
+    badgesContraste: combos.flatMap((c) => c.badges.map((b) => ({ ...b, viewport: c.viewport, tema: c.tema }))),
     contraste: appReport.contraste ?? [],
     contrasteResumo: {
       total: (appReport.contraste ?? []).length,
@@ -169,7 +207,7 @@ test('A5 (checklist 30): pares de contraste dos tokens principais passam AA', as
   // Matemática WCAG pura (node-side): tokens reais do playground, light e dark.
   const casos: Array<[string, string, string, number]> = [
     ['fg light', '#1d1d1f', '#ffffff', 4.5],
-    ['accent-text light', '#2e7d32', '#ffffff', 4.5],
+    ['accent-text light', '#286e2c', '#ffffff', 4.5],
     ['fg dark', '#f5f5f7', '#0b0b12', 4.5],
     ['accent-text dark', '#86b488', '#0b0b12', 4.5],
     ['on-accent / accent', '#ffffff', '#2e7d32', 4.5],

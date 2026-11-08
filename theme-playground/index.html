@@ -7,14 +7,15 @@
 <style>
   /* Tokens do tema — sobrescritos ao vivo pelo painel (documentElement.style) */
   :root{
-    --accent:#2E7D32; --accent-brand:#2E7D32; --accent-text:#2E7D32; --accent-strong:#256628; --accent-soft:rgba(46,125,50,.14); --on-accent:#fff;
-    --danger:#D32F2F; --danger-text:#D32F2F; --danger-soft:rgba(211,47,47,.14);
-    --warning:#f9a825; --warning-text:#8e6015; --warning-soft:rgba(249,168,37,.18);
-    --bg:#fff; --surface:#f5f5f7; --fg:#1d1d1f; --muted:#6e6e73;
+    --accent:#2E7D32; --accent-brand:#2E7D32; --accent-text:#286e2c; --accent-strong:#286e2c; --accent-soft:#e2ede2; --on-accent:#fff;
+    --danger:#D32F2F; --danger-text:#ad2727; --danger-soft:#f8dede;
+    --warning:#f9a825; --warning-text:#845914; --warning-soft:#feefd8;
+    --bg:#fff; --surface:#f7f7f7; --fg:#1d1d1f; --muted:#656567;
     /* Mesh gradient: composição rica atrás do vidro (referência: raycast.com).
        É ELE que o vidro refrata — sem cor real atrás, light mode não tem vidro. */
     --bg-mesh:radial-gradient(at 20% 0%, #b8e6c4 0%, transparent 50%), radial-gradient(at 80% 20%, #f0d9b8 0%, transparent 50%), radial-gradient(at 50% 100%, #d8c8e8 0%, transparent 50%), radial-gradient(at 90% 90%, #a8d8b8 0%, transparent 45%), linear-gradient(180deg, #fafaf7 0%, #f2f0eb 100%);
     --glass-bg:rgba(255,255,255,.38); --glass-bg-deep:rgba(255,255,255,.4); --glass-bg-thin:rgba(255,255,255,.26);
+    --glass-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
     --glass-border:rgba(0,0,0,.08); --glass-blur:44px; --glass-sat:190%; --glass-bright:1.05;
     --edge:linear-gradient(135deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.05) 50%, rgba(255,255,255,.2) 100%);
     --radius:16px; --shadow:0 1px 2px rgba(0,0,0,.04);
@@ -34,25 +35,21 @@
 
   /* App mock */
   .app{display:grid; grid-template-columns:230px 1fr; height:100vh; padding:18px; gap:18px}
-  .glass{position:relative; background:var(--glass-bg); border:none; border-radius:var(--radius); box-shadow:var(--shadow-glass);
+  .glass{position:relative; --glass-fill:var(--glass-bg); border:1px solid transparent; border-radius:var(--radius); box-shadow:var(--shadow-glass);
     backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
     -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(var(--glass-bright))}
   /* Refração real (feDisplacementMap): apenas Chromium aceita url() em backdrop-filter.
      Declarada DEPOIS da base — browsers sem suporte descartam só esta declaração e ficam com o frosted. */
   .glass{backdrop-filter:blur(calc(var(--glass-blur) - 12px)) saturate(var(--glass-sat)) brightness(var(--glass-bright)) url(#liquid-glass)}
-  /* Borda em gradiente 135deg (luz direcional) + aberração cromática sutil na aresta */
-  .glass::before,.card::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
-    background:var(--edge);
-    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-    -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude;
-    filter:drop-shadow(1px 0 0 rgba(255,0,0,.05)) drop-shadow(-1px 0 0 rgba(0,255,255,.05));
-    pointer-events:none}
-  /* Noise de vidro: sem textura o vidro parece plástico */
-  .glass::after,.card::after{content:""; position:absolute; inset:0; border-radius:inherit; opacity:.035; pointer-events:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  /* Edge em gradiente 135deg + noise como camadas do próprio elemento (sem
+     pseudos): pseudos com background bloqueavam a medição de contraste do axe
+     em todo texto dentro do vidro. */
+  .glass,.card{background:var(--glass-noise) repeat padding-box,
+    linear-gradient(var(--glass-fill),var(--glass-fill)) padding-box,
+    var(--edge) border-box;}
   /* z-depth: sidebar mais densa, header mais leve que os painéis */
-  .sidebar{--glass-blur:48px; background:var(--glass-bg-deep)}
-  .header{--glass-blur:24px; background:var(--glass-bg-thin)}
+  .sidebar{--glass-blur:48px; --glass-fill:var(--glass-bg-deep)}
+  .header{--glass-blur:24px; --glass-fill:var(--glass-bg-thin)}
   .sidebar{padding:18px; display:flex; flex-direction:column}
   .brand{font-size:26px; font-weight:700; letter-spacing:-.02em;
     background:linear-gradient(120deg,var(--accent-brand),var(--fg)); -webkit-background-clip:text; background-clip:text; color:transparent}
@@ -82,7 +79,7 @@
   .search{padding:14px 16px; border-radius:12px; border:1px solid var(--glass-border); background:var(--surface); color:var(--fg); font-size:15px; width:100%}
   .pel{align-self:flex-start; padding:12px 16px; border-radius:12px; background:var(--accent); color:var(--on-accent); border:none; font-weight:600; cursor:pointer; box-shadow:var(--shadow); white-space:nowrap}
   .cards{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
-  .card{padding:14px; border-radius:14px; background:var(--glass-bg-thin); border:none; cursor:pointer; position:relative; box-shadow:var(--shadow);
+  .card{padding:14px; border-radius:14px; --glass-fill:var(--glass-bg-thin); border:1px solid transparent; cursor:pointer; position:relative; box-shadow:var(--shadow);
     transition:transform 150ms cubic-bezier(.4,0,.2,1), box-shadow 150ms cubic-bezier(.4,0,.2,1)}
   .card:hover{transform:translateY(-1px); box-shadow:var(--shadow-hover)}
   .card:active{transform:scale(.99); transition-duration:100ms}
@@ -140,7 +137,7 @@
     .app{grid-template-columns:1fr; padding:12px; height:100dvh}
     .hamb{display:inline-flex; align-items:center; justify-content:center}
     .brand-sm{display:block; font-size:18px}
-    .sidebar{position:fixed; top:0; left:0; bottom:0; width:280px; z-index:60; border-radius:0 var(--radius) var(--radius) 0; transform:translateX(-105%); transition:transform .3s cubic-bezier(.2,.8,.2,1); background:var(--glass-bg-deep)}
+    .sidebar{position:fixed; top:0; left:0; bottom:0; width:280px; z-index:60; border-radius:0 var(--radius) var(--radius) 0; transform:translateX(-105%); transition:transform .3s cubic-bezier(.2,.8,.2,1); --glass-fill:var(--glass-bg-deep)}
     .sidebar.open{transform:translateX(0)}
     .grid{grid-template-columns:1fr}
     .panel-right{position:fixed; left:0; right:0; bottom:0; z-index:58; max-height:82dvh; transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.8,.2,1); border-radius:var(--radius) var(--radius) 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.22)}
@@ -263,8 +260,11 @@ function save(){localStorage.setItem(KEY,JSON.stringify(state));document.querySe
 function apply(){
   const d=document.documentElement.style, dk=state.mode==='dark', set=(k,v)=>d.setProperty(k,v);
   const brand = dk ? lighten(state.accent,.42) : state.accent;
-  const dtext = dk ? lighten(state.danger,.22) : state.danger;
-  const wtext = dk ? lighten(state.warning,.30) : darken(state.warning,.43);
+  /* Tons de texto semânticos: margem AA (≥4.5, alvo 5:1) sobre os soft opacos. */
+  const atext = dk ? lighten(state.accent,.42) : darken(state.accent,.12);
+  const dtext = dk ? lighten(state.danger,.45) : darken(state.danger,.18);
+  const wtext = dk ? lighten(state.warning,.30) : darken(state.warning,.47);
+  const base = dk ? state.bgDark : state.bgLight;
   const gAlpha = dk ? state.glassOpacity*.22 : state.glassOpacity;
   const violet = mix(state.accent,'#7850B4',.5);
   set('--bg-mesh', dk
@@ -284,14 +284,14 @@ function apply(){
   set('--modal-shadow', dk?'0 32px 64px -12px rgba(120,80,180,.4)':'0 32px 64px -12px rgba(0,0,0,.25)');
   set('--modal-radius','24px');
   set('--accent-glass', rgba(state.accent,.85));
-  set('--accent',state.accent); set('--accent-brand',brand); set('--accent-text',brand);
-  set('--accent-strong',darken(state.accent,.12)); set('--accent-soft',rgba(state.accent,.14));
+  set('--accent',state.accent); set('--accent-brand',brand); set('--accent-text',atext);
+  set('--accent-strong',darken(state.accent,.12)); set('--accent-soft',mix(state.accent,base,.86));
   set('--on-accent', lum(state.accent)>.62?'#111417':'#fff');
-  set('--danger',state.danger); set('--danger-text',dtext); set('--danger-soft',rgba(state.danger,.16));
-  set('--warning',state.warning); set('--warning-text',wtext); set('--warning-soft',rgba(state.warning,.18));
+  set('--danger',state.danger); set('--danger-text',dtext); set('--danger-soft',mix(state.danger,base,.84));
+  set('--warning',state.warning); set('--warning-text',wtext); set('--warning-soft',mix(state.warning,base,.82));
   set('--bg', dk?state.bgDark:state.bgLight); set('--fg', dk?state.fgDark:state.fgLight);
   set('--surface', dk?lighten(state.bgDark,.07):darken(state.bgLight,.03));
-  set('--muted', dk?mix(state.fgDark,state.bgDark,.26):mix(state.fgLight,state.bgLight,.42));
+  set('--muted', dk?mix(state.fgDark,state.bgDark,.26):mix(state.fgLight,state.bgLight,.32));
   set('--glass-border', dk?rgba('#ffffff',Math.max(state.borderAlpha,.10)):rgba('#000000',state.borderAlpha));
   set('--glass-blur',state.glassBlur+'px'); set('--radius',state.radius+'px');
   set('--glass-bright', dk?'1.1':'1.05');
