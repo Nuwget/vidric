@@ -1,11 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { compositeOver, parseColor, ratioEntre, toHex, toOklch } from '../lib/contrast';
+import { derivarCores, type DsCores, type TokensDerivados } from '../lib/cores';
+import { EVENTO_DS_CONFIG, lerConfig } from '../defaults';
 import { CodeBlock } from '../code-block';
 import { Grupo, ShowcaseSection } from '../showcase-section';
 
-/* Tokens espelhados de globals.css (fonte: theme-playground). A página só LÊ —
-   hex/OKLCH/contraste são calculados ao vivo pela lib de contraste WCAG. */
+/*
+  Tokens espelhados de globals.css (fonte: theme-playground). Os valores claros e
+  escuros abaixo são o default; quando o dev move um color picker no painel, a
+  seção recalcula a derivação do playground e mostra o par ao vivo.
+*/
 interface Token {
   var: string;
   light: string;
@@ -73,9 +79,19 @@ function SeloContraste({ ratio }: { ratio: number | null }) {
   );
 }
 
-function TokenCard({ token }: { token: Token }) {
-  const ratioLight = ratioEntre(token.light, FUNDO.light);
-  const ratioDark = ratioEntre(token.dark, FUNDO.dark);
+function TokenCard({
+  token,
+  light,
+  dark,
+  fundo,
+}: {
+  token: Token;
+  light: string;
+  dark: string;
+  fundo: { light: string; dark: string };
+}) {
+  const ratioLight = ratioEntre(light, fundo.light);
+  const ratioDark = ratioEntre(dark, fundo.dark);
   return (
     <div className="glass-card flex flex-col gap-3 p-4" data-contrast-nome={token.var}>
       <div className="flex items-baseline justify-between gap-2">
@@ -83,8 +99,8 @@ function TokenCard({ token }: { token: Token }) {
         <span className="text-[11px] text-muted-foreground">{token.uso}</span>
       </div>
       <div className="flex gap-3">
-        <Swatch valor={token.light} fundo={FUNDO.light} rotulo="Light" />
-        <Swatch valor={token.dark} fundo={FUNDO.dark} rotulo="Dark" />
+        <Swatch valor={light} fundo={fundo.light} rotulo="Light" />
+        <Swatch valor={dark} fundo={fundo.dark} rotulo="Dark" />
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2.5 text-[11px]" style={{ borderColor: 'var(--glass-border)' }}>
         <span className="money text-muted-foreground">
@@ -103,17 +119,38 @@ function TokenCard({ token }: { token: Token }) {
 }
 
 export function SecaoColors() {
+  const [cores, setCores] = useState<DsCores | null>(null);
+
+  useEffect(() => {
+    setCores(lerConfig().cores);
+    const aoMudar = (e: Event) => setCores((e as CustomEvent<{ cores: DsCores }>).detail.cores);
+    window.addEventListener(EVENTO_DS_CONFIG, aoMudar);
+    return () => window.removeEventListener(EVENTO_DS_CONFIG, aoMudar);
+  }, []);
+
+  const derivados: Record<'light' | 'dark', TokensDerivados> | null = cores
+    ? { light: derivarCores(cores, 'light'), dark: derivarCores(cores, 'dark') }
+    : null;
+  const fundo = cores ? { light: cores.bg.light, dark: cores.bg.dark } : { ...FUNDO };
+  const valorDo = (t: Token, tema: 'light' | 'dark') => derivados?.[tema][t.var] ?? t[tema];
+
   return (
     <ShowcaseSection
       id="secao-colors"
       numero="01 · Fundação"
       titulo="Colors"
-      descricao="Tokens semânticos do Vidric em light e dark. Hex e OKLCH calculados ao vivo; contraste WCAG AA versus o fundo da página. Tokens de texto abaixo de 4.5:1 são sinalizados."
+      descricao="Tokens semânticos do Vidric em light e dark, recalculados ao vivo pela derivação do playground quando um color picker do painel muda. Hex e OKLCH calculados ao vivo; contraste WCAG AA versus o fundo da página. Tokens de texto abaixo de 4.5:1 são sinalizados."
     >
       <Grupo rotulo="Paleta semântica">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {TOKENS.map((t) => (
-            <TokenCard key={t.var} token={t} />
+            <TokenCard
+              key={t.var}
+              token={t}
+              light={valorDo(t, 'light')}
+              dark={valorDo(t, 'dark')}
+              fundo={fundo}
+            />
           ))}
         </div>
       </Grupo>
