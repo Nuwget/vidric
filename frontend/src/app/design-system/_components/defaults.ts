@@ -1,3 +1,13 @@
+import {
+  CORES_DEFAULTS,
+  CORES_VARS,
+  buildCoresCss,
+  clonarCores,
+  derivarCores,
+  normalizarCores,
+  type DsCores,
+} from './lib/cores';
+
 export type Sombra = 'none' | 'soft' | 'medium' | 'strong';
 export type Tema = 'light' | 'dark';
 
@@ -14,14 +24,16 @@ export interface DsConfig {
   fontScale: number;
   reducedMotion: boolean;
   highContrast: boolean;
+  cores: DsCores;
 }
 
 /*
   Defaults derivados de theme-playground/index.html (DEFAULTS + apply()):
   glassOpacity .38, glassBlur 44, radius 16; --glass-sat 190% e o specular
   inset .75 (light) / .35 (dark) vêm do globals.css, que copia o playground.
-  Esta página só LÊ os defaults — aprovado algo, o dev atualiza o playground
-  e o globals.css manualmente.
+  As cores base (CORES_DEFAULTS) também são do playground; com os pickers do
+  painel elas só sobrescrevem em runtime (inline no :root desta rota). Aprovou
+  um resultado? Exportar CSS vars → playground → globals.css manualmente.
 */
 export const DS_DEFAULTS: DsConfig = {
   glassOpacity: 0.38,
@@ -36,10 +48,14 @@ export const DS_DEFAULTS: DsConfig = {
   fontScale: 100,
   reducedMotion: false,
   highContrast: false,
+  cores: clonarCores(CORES_DEFAULTS),
 };
 
 export const DS_STORAGE_KEY = 'vidric.design-system.config';
 export const DS_SNAPSHOTS_KEY = 'vidric.design-system.snapshots';
+
+/** Disparado por aplicarConfig() com o DsConfig no detail — as seções re-leem os tokens. */
+export const EVENTO_DS_CONFIG = 'vidric:ds-config';
 
 export type Snapshots = Record<string, DsConfig>;
 
@@ -80,11 +96,16 @@ export function aplicarConfig(c: DsConfig): void {
 
   document.documentElement.dataset.theme = c.theme;
 
+  // Cores base: mesma derivação do apply() do playground, recalculada no ato.
+  for (const [k, v] of Object.entries(derivarCores(c.cores, c.theme))) set(k, v);
+
   // Acessibilidade: zoom real (rem), movimento e contraste reduzidos simulados.
   // As media queries reais têm o mesmo efeito via CSS escopado no shell.
   document.documentElement.style.fontSize = c.fontScale === 100 ? '' : `${c.fontScale}%`;
   document.documentElement.dataset.reducedMotion = String(c.reducedMotion);
   document.documentElement.dataset.contrast = c.highContrast ? 'more' : 'normal';
+
+  window.dispatchEvent(new CustomEvent(EVENTO_DS_CONFIG, { detail: c }));
 }
 
 export function limparConfigAplicada(): void {
@@ -104,6 +125,7 @@ export function limparConfigAplicada(): void {
     '--glass-border-width',
     '--shadow-glass',
     '--shadow-hover',
+    ...CORES_VARS,
   ]) {
     html.style.removeProperty(k);
   }
@@ -128,15 +150,17 @@ export function buildExportCss(c: DsConfig): string {
     c.borderWidth !== 1
       ? '\n  /* --glass-border-width precisa de .glass { border-width: var(--glass-border-width); } no globals.css */'
       : '';
-  return `/* Design System — Vidric · tema ${c.theme} · valores computados em /design-system (dev) */\n:root {\n${linhas}${notaBorda}\n}`;
+  const vidro = `/* Design System — Vidric · tema ${c.theme} · valores computados em /design-system (dev) */\n:root {\n${linhas}${notaBorda}\n}`;
+  return `${vidro}\n\n${buildCoresCss(c.cores)}`;
 }
 
 export function lerConfig(): DsConfig {
   try {
     const s = JSON.parse(localStorage.getItem(DS_STORAGE_KEY) ?? 'null');
-    return s ? { ...DS_DEFAULTS, ...s } : { ...DS_DEFAULTS };
+    if (!s) return { ...DS_DEFAULTS, cores: clonarCores(CORES_DEFAULTS) };
+    return { ...DS_DEFAULTS, ...s, cores: normalizarCores(s.cores) };
   } catch {
-    return { ...DS_DEFAULTS };
+    return { ...DS_DEFAULTS, cores: clonarCores(CORES_DEFAULTS) };
   }
 }
 

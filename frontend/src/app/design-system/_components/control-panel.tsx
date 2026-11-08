@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookmarkPlus, Copy, RotateCcw, X, ShieldCheck, Loader2, Download } from 'lucide-react';
+import { BookmarkPlus, Copy, RotateCcw, X, ShieldCheck, Loader2, Download, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CORES_DEFAULTS } from './lib/cores';
 import type { DsConfig, Snapshots, Sombra } from './defaults';
 import type { ResultadoAxe } from './lib/a11y';
 
@@ -73,6 +74,67 @@ function LinhaSlider({
   );
 }
 
+/** Color picker de um token base: nome + hex atual + "resetar só este". */
+function LinhaCor({
+  chave,
+  rotulo,
+  valor,
+  dica,
+  onChange,
+  onRestaurar,
+}: {
+  chave: string;
+  rotulo: string;
+  valor: string;
+  dica?: string;
+  onChange: (v: string) => void;
+  onRestaurar: () => void;
+}) {
+  const id = `cor-${chave}`;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-2 text-xs">
+        <Label htmlFor={id} className="font-medium">
+          {rotulo}
+        </Label>
+        <div className="flex items-center gap-1.5">
+          <span
+            data-testid={`hex-${chave}`}
+            className="money font-mono text-[11px] uppercase"
+            style={{ color: 'var(--muted)' }}
+          >
+            {valor}
+          </span>
+          <button
+            type="button"
+            data-testid={`reset-${chave}`}
+            aria-label={`Restaurar ${rotulo} ao default do playground`}
+            onClick={onRestaurar}
+            className="grid size-6 place-items-center rounded-md"
+            style={{ color: 'var(--muted)' }}
+          >
+            <RotateCcw className="size-3" aria-hidden />
+          </button>
+        </div>
+      </div>
+      <input
+        id={id}
+        type="color"
+        data-testid={`picker-${chave}`}
+        value={valor}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9 w-full cursor-pointer rounded-lg border bg-transparent p-1"
+        style={{ borderColor: 'var(--glass-border)' }}
+      />
+      {dica && (
+        <p className="text-[10px] leading-snug" style={{ color: 'var(--muted)' }}>
+          {dica}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function ControlPanel({
   config,
   snapshots,
@@ -90,6 +152,10 @@ export function ControlPanel({
 }: Props) {
   const [nomeSnapshot, setNomeSnapshot] = useState('');
   const nomes = Object.keys(snapshots);
+  const temaAtivo = config.theme === 'dark' ? 'escuro' : 'claro';
+
+  const mudarCor = (patch: Partial<DsConfig['cores']>) =>
+    onChange({ cores: { ...config.cores, ...patch } });
 
   return (
     <div data-testid="painel-controle" className="flex flex-col gap-5">
@@ -98,6 +164,55 @@ export function ControlPanel({
         <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>
           CSS vars ao vivo · salvo no navegador
         </p>
+      </div>
+
+      <div
+        className="flex flex-col gap-3.5 border-b pb-5"
+        style={{ borderColor: 'var(--glass-border)' }}
+      >
+        <p
+          className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
+          style={{ color: 'var(--muted)' }}
+        >
+          <Palette className="size-3.5" aria-hidden /> Cores (tokens base)
+        </p>
+        <LinhaCor
+          chave="accent"
+          rotulo="accent"
+          valor={config.cores.accent}
+          onChange={(v) => mudarCor({ accent: v })}
+          onRestaurar={() => mudarCor({ accent: CORES_DEFAULTS.accent })}
+        />
+        <LinhaCor
+          chave="error"
+          rotulo="error · --danger"
+          valor={config.cores.error}
+          onChange={(v) => mudarCor({ error: v })}
+          onRestaurar={() => mudarCor({ error: CORES_DEFAULTS.error })}
+        />
+        <LinhaCor
+          chave="warning"
+          rotulo="warning"
+          valor={config.cores.warning}
+          onChange={(v) => mudarCor({ warning: v })}
+          onRestaurar={() => mudarCor({ warning: CORES_DEFAULTS.warning })}
+        />
+        <LinhaCor
+          chave="fg"
+          rotulo={`fg · ${temaAtivo}`}
+          valor={config.cores.fg[config.theme]}
+          dica="Edita o tema ativo; o outro mantém o valor do playground."
+          onChange={(v) => mudarCor({ fg: { ...config.cores.fg, [config.theme]: v } })}
+          onRestaurar={() => mudarCor({ fg: { ...CORES_DEFAULTS.fg } })}
+        />
+        <LinhaCor
+          chave="bg"
+          rotulo={`bg · ${temaAtivo}`}
+          valor={config.cores.bg[config.theme]}
+          dica="Alimenta também --surface, --muted e os fundos soft."
+          onChange={(v) => mudarCor({ bg: { ...config.cores.bg, [config.theme]: v } })}
+          onRestaurar={() => mudarCor({ bg: { ...CORES_DEFAULTS.bg } })}
+        />
       </div>
 
       <div className="flex flex-col gap-4">

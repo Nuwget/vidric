@@ -184,7 +184,7 @@ export function DesignSystemShell({ children }: { children: ReactNode }) {
     if (!montado) return;
     const t = setTimeout(() => setPares(coletarParesContraste()), 350);
     return () => clearTimeout(t);
-  }, [montado, efetivo.theme, efetivo.fontScale, efetivo.highContrast, efetivo.showCode]);
+  }, [montado, efetivo.theme, efetivo.fontScale, efetivo.highContrast, efetivo.showCode, efetivo.cores]);
 
   const mudar = useCallback((patch: Partial<DsConfig>) => {
     setConfig((atual) => ({ ...(atual ?? DS_DEFAULTS), ...patch }));
