@@ -8,6 +8,11 @@ import { VidricLogo } from '@/components/vidric-logo';
 import type { Session } from '@/lib/auth';
 import { drawer } from '@/lib/motion';
 
+interface SubItem {
+  href: string;
+  rotulo: string;
+}
+
 interface Props {
   session: Session | null;
   aberto: boolean;
@@ -15,10 +20,20 @@ interface Props {
 }
 
 const NAV = [
-  { href: '/pdv', rotulo: 'PDV', icone: Calculator, emBreve: false },
-  { href: '/estoque', rotulo: 'Estoque', icone: Package, emBreve: false },
-  { href: '/estoque/relatorios/parados', rotulo: 'Relatórios', icone: BarChart3, emBreve: false },
-  { href: '/financeiro', rotulo: 'Financeiro', icone: Wallet, emBreve: true },
+  { href: '/pdv', rotulo: 'PDV', icone: Calculator, emBreve: false, sub: [] as SubItem[] },
+  { href: '/estoque', rotulo: 'Estoque', icone: Package, emBreve: false, sub: [] as SubItem[] },
+  { href: '/estoque/relatorios/parados', rotulo: 'Relatórios', icone: BarChart3, emBreve: false, sub: [] as SubItem[] },
+  {
+    href: '/financeiro',
+    rotulo: 'Financeiro',
+    icone: Wallet,
+    emBreve: false,
+    sub: [
+      { href: '/financeiro', rotulo: 'Dashboard' },
+      { href: '/financeiro/a-receber', rotulo: 'A Receber' },
+      { href: '/financeiro/fluxo-caixa', rotulo: 'Fluxo de Caixa' },
+    ] as SubItem[],
+  },
 ];
 
 export function Sidebar({ session, aberto, onFechar }: Props) {
@@ -49,7 +64,7 @@ export function Sidebar({ session, aberto, onFechar }: Props) {
       </div>
 
       <nav className="mt-6 flex flex-col gap-1.5">
-        {NAV.map(({ href, rotulo, icone: Icone, emBreve }) => {
+        {NAV.map(({ href, rotulo, icone: Icone, emBreve, sub }) => {
           const ativo = !emBreve && href === hrefAtivo;
           if (emBreve) {
             return (
@@ -67,21 +82,44 @@ export function Sidebar({ session, aberto, onFechar }: Props) {
             );
           }
           return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onFechar}
-              aria-current={ativo ? 'page' : undefined}
-              className={`flex items-center gap-2.5 px-3.5 py-3 rounded-[calc(var(--radius)*0.6)] text-[15px] no-underline ${
-                ativo ? 'font-semibold' : 'text-muted-foreground hover:text-foreground'
-              }`}
-              style={
-                ativo ? { background: 'var(--accent-soft)', color: 'var(--accent-text)' } : undefined
-              }
-            >
-              <Icone className="size-4" />
-              {rotulo}
-            </Link>
+            <div key={href} className="flex flex-col gap-0.5">
+              <Link
+                href={href}
+                onClick={onFechar}
+                aria-current={ativo ? 'page' : undefined}
+                className={`flex items-center gap-2.5 px-3.5 py-3 rounded-[calc(var(--radius)*0.6)] text-[15px] no-underline ${
+                  ativo ? 'font-semibold' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                style={
+                  ativo ? { background: 'var(--accent-soft)', color: 'var(--accent-text)' } : undefined
+                }
+              >
+                <Icone className="size-4" />
+                {rotulo}
+              </Link>
+              {sub.length > 0 &&
+                ativo &&
+                sub.map((item) => {
+                  const subAtivo = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onFechar}
+                      aria-current={subAtivo ? 'page' : undefined}
+                      data-testid={`submenu-${item.rotulo.toLowerCase().replace(/\s+/g, '-')}`}
+                      className={`flex items-center gap-2.5 pl-10 pr-3.5 py-2 rounded-[calc(var(--radius)*0.6)] text-[13px] no-underline ${
+                        subAtivo ? 'font-semibold' : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      style={
+                        subAtivo ? { color: 'var(--accent-text)' } : undefined
+                      }
+                    >
+                      {item.rotulo}
+                    </Link>
+                  );
+                })}
+            </div>
           );
         })}
       </nav>
